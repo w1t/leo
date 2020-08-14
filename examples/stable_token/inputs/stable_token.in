@@ -1,0 +1,9 @@
+// The program input for stable_token/src/main.leo
+[main]
+token_debit: u8[48] = [0u8; 48];
+token_credit: u8[48] = [1u8; 48];
+central_authority: address = aleo1daxej63vwrmn2zhl4dymygagh89k5d2vaw6rjauueme7le6k2q8sjn0ng9;
+
+[registers]
+id: u8 = 1;
+value_balance: u8 = 0;
