@@ -260,10 +260,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> fmt::Display for ConstrainedValue<F
             ConstrainedValue::Boolean(ref value) => write!(
                 f,
                 "{}",
-                value
-                    .get_value()
-                    .map(|v| v.to_string())
-                    .unwrap_or(format!("[allocated]"))
+                value.get_value().map(|v| v.to_string()).unwrap_or(format!("[input]"))
             ),
             ConstrainedValue::Field(ref value) => write!(f, "{:?}", value),
             ConstrainedValue::Group(ref value) => write!(f, "{:?}", value),
@@ -305,8 +302,8 @@ impl<F: Field + PrimeField, G: GroupType<F>> fmt::Display for ConstrainedValue<F
                 write!(f, "function {{ {}() }}", function.identifier)
             }
             ConstrainedValue::Import(_, ref value) => write!(f, "{}", value),
-            ConstrainedValue::Mutable(ref value) => write!(f, "mut {}", value),
-            ConstrainedValue::Static(ref value) => write!(f, "static {}", value),
+            ConstrainedValue::Mutable(ref value) => write!(f, "{}", value),
+            ConstrainedValue::Static(ref value) => write!(f, "{}", value),
             ConstrainedValue::Unresolved(ref value) => write!(f, "unresolved {}", value),
         }
     }

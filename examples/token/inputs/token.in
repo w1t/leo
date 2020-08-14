@@ -1,0 +1,8 @@
+// The program input for token/src/main.leo
+[main]
+token_debit: u8[48] = [0u8; 48];
+token_credit: u8[48] = [1u8; 48];
+
+[registers]
+id: u8 = 1;
+value_balance: u8 = 0;
