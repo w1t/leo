@@ -2,7 +2,7 @@
 [[public]]
 
 [state]
-leaf_index: u32 = 2;
+leaf_index: u32 = 0;
 root: u8[32] = [0u8; 32];
 
 [[private]]
@@ -10,11 +10,11 @@ root: u8[32] = [0u8; 32];
 [record]
 serial_number: u8[32] = [0u8; 32];
 commitment: u8[32] = [0u8; 32];
-owner: address = aleo1daxej63vwrmn2zhl4dymygagh89k5d2vaw6rjauueme7le6k2q8sjn0ng9;
+owner: address = aleo1qnr4dkkvkgfqph0vzc3y6z2eu975wnpz2925ntjccd5cfqxtyu8sta57j8;
 is_dummy: bool = false;
 value: u64 = 0;
-payload: u8[32] = [1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-birth_program_id: u8[48] = [3u8; 48];
+payload: u8[32] = [2, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+birth_program_id: u8[48] = [2u8; 48];
 death_program_id: u8[48] = [1u8; 48];
 serial_number_nonce: u8[32] = [0u8; 32];
 commitment_randomness: u8[32] = [0u8; 32];

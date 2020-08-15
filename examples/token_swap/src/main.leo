@@ -10,13 +10,13 @@ function main(
 ) -> (u8, u8, address, address, u8, u8) {
 
     // State 0
-    //let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_token_debit(input);
+    let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_token_debit(input);
 
     // State 1
     //let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_or_cancel(input, is_exchange, refund);
 
     // State 2
-    let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_token_0_credit(input);
+    //let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_token_0_credit(input);
 
     // State 3
     //let (id_0, id_1, maker_recv, taker_recv, vb_0, vb_1) = exchange_token_1_credit(input);

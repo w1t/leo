@@ -1,13 +1,13 @@
 // The program input for token_swap/src/main.leo
 [main]
 is_exchange: bool = true;
-refund: address = aleo1daxej63vwrmn2zhl4dymygagh89k5d2vaw6rjauueme7le6k2q8sjn0ng9;
+refund: address = aleo1qnr4dkkvkgfqph0vzc3y6z2eu975wnpz2925ntjccd5cfqxtyu8sta57j8;
 
 [registers]
 id_0: u8 = 1;
 id_1: u8 = 2;
 maker_recv: address = aleo1daxej63vwrmn2zhl4dymygagh89k5d2vaw6rjauueme7le6k2q8sjn0ng9;
 taker_recv: address = aleo1qnr4dkkvkgfqph0vzc3y6z2eu975wnpz2925ntjccd5cfqxtyu8sta57j8;
-vb_0: u8 = 10;
-vb_1: u8 = 20;
+vb_0: u8 = 0;
+vb_1: u8 = 0;
 
