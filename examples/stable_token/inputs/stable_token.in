@@ -6,4 +6,4 @@ central_authority: address = aleo1daxej63vwrmn2zhl4dymygagh89k5d2vaw6rjauueme7le
 
 [registers]
 id: u8 = 1;
-value_balance: u8 = 0;
+value_balance: u8 = 100;

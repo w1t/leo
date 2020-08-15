@@ -31,13 +31,13 @@ function debit(
     // let verified = signature.verify(policy, central_authority);
     // assert_eq!(verified, true);
 
-    //let policy = input.record.payload[2];
-    //let fake_check = policy != 0;
-    //assert_eq!(fake_check, true);
+    let policy = input.record.payload[2];
+    let fake_check = policy != 0;
+    assert_eq!(fake_check, true);
 
-    //let signature = input.record.payload[3];
-    //let fake_check = signature != 0;
-    //assert_eq!(fake_check, true);
+    let signature = input.record.payload[3];
+    let fake_check = signature != 0;
+    assert_eq!(fake_check, true);
 
     // 6. Enforce policy
     // TODO: check that owner is not a forbidden address
@@ -77,13 +77,13 @@ function credit(
     // let verified = signature.verify(policy, central_authority);
     // assert_eq!(verified, true);
 
-    //let policy = input.record.payload[2];
-    //let fake_check = policy != 0;
-    //assert_eq!(fake_check, true);
+    let policy = input.record.payload[2];
+    let fake_check = policy != 0;
+    assert_eq!(fake_check, true);
 
-    //let signature = input.record.payload[3];
-    //let fake_check = signature != 0;
-    //assert_eq!(fake_check, true);
+    let signature = input.record.payload[3];
+    let fake_check = signature != 0;
+    assert_eq!(fake_check, true);
 
     // 4. Enforce policy
     // TODO: check that owner is not a forbidden address
