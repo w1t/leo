@@ -113,6 +113,12 @@ impl StatementError {
         Self::new_from_span(message, span)
     }
 
+    pub fn multiple_returns(span: Span) -> Self {
+        let message = format!("this function returns before ");
+
+        Self::new_from_span(message, span)
+    }
+
     pub fn multiple_definition(value: String, span: Span) -> Self {
         let message = format!("cannot assign multiple variables to a single value: {}", value,);
 

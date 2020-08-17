@@ -93,9 +93,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         }
 
         // Conditionally select a result based on returned indicators
-        let mut return_values = ConstrainedValue::Tuple(vec![]);
-
-        Self::conditionally_select_result(cs, &mut return_values, results, function.span.clone())?;
+        let result = Self::conditionally_select_result(cs, function.returns, results, function.span.clone())?;
 
         if let ConstrainedValue::Tuple(ref returns) = return_values {
             let return_types = match function.returns {

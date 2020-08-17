@@ -2,7 +2,7 @@
 
 use crate::{errors::StatementError, program::ConstrainedProgram, value::ConstrainedValue, GroupType};
 
-use leo_typed::Span;
+use leo_typed::{Span, Type};
 
 use snarkos_models::{
     curves::{Field, PrimeField},
@@ -16,14 +16,28 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
     /// iterates through a vector of results and selects one based off of indicators
     pub fn conditionally_select_result<CS: ConstraintSystem<F>>(
         cs: &mut CS,
-        return_value: &mut ConstrainedValue<F, G>,
+        expected_return: Option<Type>,
         results: Vec<(Option<Boolean>, ConstrainedValue<F, G>)>,
         span: Span,
-    ) -> Result<(), StatementError> {
-        // if there are no results, continue
-        if results.len() == 0 {
-            return Ok(());
-        }
+    ) -> Result<ConstrainedValue<F, G>, StatementError> {
+        // Initialize empty return value
+        let mut return_value = ConstrainedValue::Tuple(vec![]);
+
+        // if the function does not expect a return type, make sure there are no returned results.
+        let return_type = match expected_return {
+            Some(return_type) => return_type,
+            None => {
+                if results.len() == 0 {
+                    return Ok(return_value);
+                } else {
+                    return Err(StatementError::invalid_number_of_returns(
+                        0,
+                        results.len(),
+                        span.clone(),
+                    ));
+                }
+            }
+        };
 
         // If all indicators are none, then there are no branch conditions in the function.
         // We simply return the last result.
@@ -31,17 +45,30 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         if let None = results.iter().find(|(indicator, _res)| indicator.is_some()) {
             let result = &results[results.len() - 1].1;
 
-            *return_value = result.clone();
+            return Ok(result.clone());
+        }
 
-            return Ok(());
+        // Find the return value
+        let mut ignored = vec![];
+        let found_return = false;
+        for (indicator, result) in results.into_iter() {
+            if let Some(indicator_bool) = indicator {
+                if indicator_bool {
+                    // Error if we already have a return value
+                    if found_return {
+                        return Err();
+                    } else {
+                    }
+                }
+            }
         }
 
         // If there are branches in the function we need to use the `ConditionalSelectGadget` to parse through and select the correct one.
-        // This can be thought of as de-multiplexing all previous wires that may have returned results into one.
         for (i, (indicator, result)) in results.into_iter().enumerate() {
-            // Set the first value as the starting point
-            if i == 0 {
-                *return_value = result.clone();
+            // Error if a statement returned a result with an incorrect type
+            let result_type = result.to_type(span.clone())?;
+            if return_type != result_type {
+                return Err(StatementError::arguments_type(&return_type, &result_type, span.clone()));
             }
 
             let condition = indicator.unwrap_or(Boolean::Constant(true));
