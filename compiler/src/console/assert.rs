@@ -14,7 +14,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         cs: &mut CS,
         file_scope: String,
         function_scope: String,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         expression: Expression,
         span: Span,
     ) -> Result<(), ConsoleError> {
@@ -28,10 +28,8 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         // This is okay since we are not enforcing any constraints
         let false_boolean = Boolean::Constant(false);
 
-        if let Some(indicator_bool) = indicator {
-            if indicator_bool.eq(&false_boolean) {
-                return Ok(()); // continue execution
-            }
+        if indicator.eq(&false_boolean) {
+            return Ok(()); // continue execution
         }
 
         // Unwrap assertion value and handle errors

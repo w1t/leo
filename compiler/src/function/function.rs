@@ -23,11 +23,11 @@ use crate::{
     GroupType,
 };
 
-use leo_typed::{Expression, Function, InputVariable, Span, Type};
+use leo_typed::{Expression, Function, InputVariable, Span};
 
 use snarkos_models::{
     curves::{Field, PrimeField},
-    gadgets::r1cs::ConstraintSystem,
+    gadgets::{r1cs::ConstraintSystem, utilities::boolean::Boolean},
 };
 
 pub fn check_arguments_length(expected: usize, actual: usize, span: Span) -> Result<(), FunctionError> {
@@ -94,13 +94,14 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
 
         // Evaluate every statement in the function and save all potential results
         let mut results = vec![];
+        let indicator = Boolean::constant(true);
 
         for statement in function.statements.iter() {
             let mut result = self.enforce_statement(
                 cs,
                 scope.clone(),
                 function_name.clone(),
-                None,
+                &indicator,
                 statement.clone(),
                 function.returns.clone(),
             )?;
@@ -111,22 +112,6 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         // Conditionally select a result based on returned indicators
         let result = Self::conditionally_select_result(cs, function.returns, results, function.span.clone())?;
 
-        if let ConstrainedValue::Tuple(ref returns) = return_values {
-            let return_types = match function.returns {
-                Some(Type::Tuple(types)) => types.len(),
-                Some(_) => 1usize,
-                None => 0usize,
-            };
-
-            if return_types != returns.len() {
-                return Err(FunctionError::return_arguments_length(
-                    return_types,
-                    returns.len(),
-                    function.span.clone(),
-                ));
-            }
-        }
-
-        Ok(return_values)
+        Ok(result)
     }
 }

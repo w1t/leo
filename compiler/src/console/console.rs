@@ -14,7 +14,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         cs: &mut CS,
         file_scope: String,
         function_scope: String,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         console: ConsoleFunctionCall,
     ) -> Result<(), ConsoleError> {
         match console.function {
@@ -50,13 +50,8 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
 
 // Return the indicator boolean gadget value or true if it is None
 // This is okay since we are not enforcing any constraints
-fn unwrap_indicator_value(indicator: Option<Boolean>) -> bool {
-    let false_boolean = Boolean::constant(false);
+fn unwrap_indicator_value(indicator: &Boolean) -> bool {
+    let true_boolean = Boolean::constant(true);
 
-    if let Some(indicator_bool) = indicator {
-        if indicator_bool.eq(&false_boolean) {
-            return false;
-        }
-    }
-    true
+    return indicator.eq(&true_boolean);
 }

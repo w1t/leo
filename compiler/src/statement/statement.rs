@@ -35,16 +35,16 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         cs: &mut CS,
         file_scope: String,
         function_scope: String,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         statement: Statement,
         return_type: Option<Type>,
-    ) -> Result<Vec<(Option<Boolean>, ConstrainedValue<F, G>)>, StatementError> {
+    ) -> Result<Vec<(Boolean, ConstrainedValue<F, G>)>, StatementError> {
         let mut results = vec![];
 
         match statement {
             Statement::Return(expression, span) => {
                 let return_value = (
-                    indicator,
+                    indicator.clone(),
                     self.enforce_return_statement(cs, file_scope, function_scope, expression, return_type, span)?,
                 );
 
@@ -110,7 +110,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
                     _ => return Err(StatementError::unassigned(expression_string, span)),
                 }
 
-                let result = (indicator, value);
+                let result = (indicator.clone(), value);
 
                 results.push(result);
             }

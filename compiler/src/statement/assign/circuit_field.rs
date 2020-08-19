@@ -31,14 +31,12 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
     pub fn mutute_circuit_field<CS: ConstraintSystem<F>>(
         &mut self,
         cs: &mut CS,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         circuit_name: String,
         object_name: Identifier,
         mut new_value: ConstrainedValue<F, G>,
         span: Span,
     ) -> Result<(), StatementError> {
-        let condition = indicator.unwrap_or(Boolean::Constant(true));
-
         match self.get_mutable_assignee(circuit_name, span.clone())? {
             ConstrainedValue::CircuitExpression(_variable, members) => {
                 // Modify the circuit field in place
@@ -61,7 +59,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
                             let name_unique = format!("select {} {}:{}", new_value, span.line, span.start);
                             let selected_value = ConstrainedValue::conditionally_select(
                                 cs.ns(|| name_unique),
-                                &condition,
+                                indicator,
                                 &new_value,
                                 &object.1,
                             )

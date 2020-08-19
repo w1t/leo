@@ -39,7 +39,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         cs: &mut CS,
         file_scope: String,
         function_scope: String,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         assignee: Assignee,
         expression: Expression,
         span: Span,
@@ -54,14 +54,13 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         // Mutate the old value into the new value
         match assignee {
             Assignee::Identifier(_identifier) => {
-                let condition = indicator.unwrap_or(Boolean::Constant(true));
                 let old_value = self.get_mutable_assignee(variable_name.clone(), span.clone())?;
 
                 new_value.resolve_type(Some(old_value.to_type(span.clone())?), span.clone())?;
 
                 let name_unique = format!("select {} {}:{}", new_value, span.line, span.start);
                 let selected_value =
-                    ConstrainedValue::conditionally_select(cs.ns(|| name_unique), &condition, &new_value, old_value)
+                    ConstrainedValue::conditionally_select(cs.ns(|| name_unique), indicator, &new_value, old_value)
                         .map_err(|_| StatementError::select_fail(new_value.to_string(), old_value.to_string(), span))?;
 
                 *old_value = selected_value;

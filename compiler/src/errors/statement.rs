@@ -124,7 +124,17 @@ impl StatementError {
     }
 
     pub fn multiple_returns(span: Span) -> Self {
-        let message = format!("this function returns before ");
+        let message =
+            format!("This function returns multiple times and produces unreachable circuits with undefined behavior.");
+
+        Self::new_from_span(message, span)
+    }
+
+    pub fn no_returns(expected: Type, span: Span) -> Self {
+        let message = format!(
+            "function expected `{}` return type but no valid branches returned a result",
+            expected
+        );
 
         Self::new_from_span(message, span)
     }

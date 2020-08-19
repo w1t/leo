@@ -40,14 +40,14 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         cs: &mut CS,
         file_scope: String,
         function_scope: String,
-        indicator: Option<Boolean>,
+        indicator: &Boolean,
         index: Identifier,
         start: Expression,
         stop: Expression,
         statements: Vec<Statement>,
         return_type: Option<Type>,
         span: Span,
-    ) -> Result<Vec<(Option<Boolean>, ConstrainedValue<F, G>)>, StatementError> {
+    ) -> Result<Vec<(Boolean, ConstrainedValue<F, G>)>, StatementError> {
         let mut results = vec![];
 
         let from = self.enforce_index(cs, file_scope.clone(), function_scope.clone(), start, span.clone())?;

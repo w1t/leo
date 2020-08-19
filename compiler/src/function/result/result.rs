@@ -33,7 +33,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
     pub fn conditionally_select_result<CS: ConstraintSystem<F>>(
         cs: &mut CS,
         expected_return: Option<Type>,
-        results: Vec<(Option<Boolean>, ConstrainedValue<F, G>)>,
+        results: Vec<(Boolean, ConstrainedValue<F, G>)>,
         span: Span,
     ) -> Result<ConstrainedValue<F, G>, StatementError> {
         // Initialize empty return value
@@ -46,58 +46,54 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
                 if results.len() == 0 {
                     return Ok(return_value);
                 } else {
-                    return Err(StatementError::invalid_number_of_returns(
-                        0,
-                        results.len(),
-                        span.clone(),
-                    ));
+                    return Err(StatementError::invalid_number_of_returns(0, results.len(), span));
                 }
             }
         };
 
-        // If all indicators are none, then there are no branch conditions in the function.
-        // We simply return the last result.
-
-        if let None = results.iter().find(|(indicator, _res)| indicator.is_some()) {
-            let result = &results[results.len() - 1].1;
-
-            return Ok(result.clone());
+        // Error if the function or one of its branches does not return
+        if let None = results
+            .iter()
+            .find(|(indicator, _res)| indicator.eq(&Boolean::constant(true)))
+        {
+            return Err(StatementError::no_returns(return_type, span));
         }
 
         // Find the return value
         let mut ignored = vec![];
-        let found_return = false;
+        let mut found_return = false;
         for (indicator, result) in results.into_iter() {
-            if let Some(indicator_bool) = indicator {
-                if indicator_bool {
-                    // Error if we already have a return value
-                    if found_return {
-                        return Err();
-                    } else {
-                    }
-                }
-            }
-        }
-
-        // If there are branches in the function we need to use the `ConditionalSelectGadget` to parse through and select the correct one.
-        for (i, (indicator, result)) in results.into_iter().enumerate() {
             // Error if a statement returned a result with an incorrect type
             let result_type = result.to_type(span.clone())?;
             if return_type != result_type {
-                return Err(StatementError::arguments_type(&return_type, &result_type, span.clone()));
+                return Err(StatementError::arguments_type(&return_type, &result_type, span));
             }
 
-            let condition = indicator.unwrap_or(Boolean::Constant(true));
-            let name_unique = format!("select {} {}:{}", result, span.line, span.start);
+            if indicator.eq(&Boolean::Constant(true)) {
+                // Error if we already have a return value
+                if found_return {
+                    return Err(StatementError::multiple_returns(span));
+                } else {
+                    return_value = result;
+                    found_return = true;
+                }
+            } else {
+                ignored.push((indicator, result));
+            }
+        }
+
+        // Conditionally select out the ignored results.
+        for (i, (indicator, result)) in ignored.into_iter().enumerate() {
+            let name_unique = format!("select result {} {}:{}", i, span.line, span.start);
             let selected_value =
-                ConstrainedValue::conditionally_select(cs.ns(|| name_unique), &condition, &result, return_value)
+                ConstrainedValue::conditionally_select(cs.ns(|| name_unique), &indicator, &result, &return_value)
                     .map_err(|_| {
                         StatementError::select_fail(result.to_string(), return_value.to_string(), span.clone())
                     })?;
 
-            *return_value = selected_value;
+            return_value = selected_value;
         }
 
-        Ok(())
+        Ok(return_value)
     }
 }
