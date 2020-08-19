@@ -16,6 +16,7 @@
 
 use leo_typed::{Error as FormattedError, Span};
 
+use snark_std::field::FieldError as StdFieldError;
 use snarkos_errors::gadgets::SynthesisError;
 use std::path::PathBuf;
 
@@ -71,6 +72,12 @@ impl FieldError {
 
     pub fn synthesis_error(error: SynthesisError, span: Span) -> Self {
         let message = format!("compilation failed due to field synthesis error `{}`", error);
+
+        Self::new_from_span(message, span)
+    }
+
+    pub fn std_field_error(error: StdFieldError, span: Span) -> Self {
+        let message = format!("{:?}", error);
 
         Self::new_from_span(message, span)
     }

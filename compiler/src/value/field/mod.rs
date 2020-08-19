@@ -50,6 +50,8 @@ impl<F: Field + PrimeField, CS: ConstraintSystem<F>> Clone for FieldCircuitBuild
 }
 
 // impl<F: Field + PrimeField, CS: ConstraintSystem<F>> FieldCircuitBuilder<F, CS> {
-//     fn new()
+//     pub fn new(cs: CS) -> Self {
+//         Self { 0: Rc::new(RefCell::new(())), 1: Default::default() }
+//     }
 //
 // }

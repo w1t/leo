@@ -20,7 +20,7 @@ pub mod boolean;
 pub mod circuits;
 pub mod console;
 pub mod definition;
-// pub mod field;
+pub mod field;
 pub mod function;
 // pub mod group;
 pub mod import;
