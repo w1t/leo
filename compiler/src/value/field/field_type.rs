@@ -240,19 +240,12 @@ impl<F: Field + PrimeField> EvaluateEqGadget<F> for FieldType<F> {
             (FieldType::Constant(_), FieldType::Allocated(_)) => unimplemented!(),
             (FieldType::Allocated(_), FieldType::Constant(_)) => unimplemented!(),
             (FieldType::Allocated(first), FieldType::Allocated(second)) => {
-                let first_namespace = &mut cs.ns(|| format!("eq first"));
-                let first_builder = FieldCircuitBuilder {
-                    0: Rc::new(RefCell::new(first_namespace)),
+                let builder = FieldCircuitBuilder {
+                    0: Rc::new(RefCell::new(cs)),
                     1: Default::default(),
                 };
-                let first_std = FieldStd::from((first.clone(), first_builder));
-
-                let second_namespace = &mut cs.ns(|| format!("eq second"));
-                let second_builder = FieldCircuitBuilder {
-                    0: Rc::new(RefCell::new(second_namespace)),
-                    1: Default::default(),
-                };
-                let second_std = FieldStd::from((second.clone(), second_builder));
+                let first_std = FieldStd::from((first.clone(), builder.clone()));
+                let second_std = FieldStd::from((second.clone(), builder.clone()));
 
                 let result_std = first_std.eq(&second_std).map_err(|_| SynthesisError::Unsatisfiable)?;
                 let result_option = result_std.to_gadget_unsafe();
