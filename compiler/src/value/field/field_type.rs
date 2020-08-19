@@ -19,6 +19,7 @@
 use crate::errors::FieldError;
 use leo_typed::Span;
 
+use snark_std::field::Field as FieldStd;
 use snarkos_errors::gadgets::SynthesisError;
 use snarkos_models::{
     curves::{Field, PrimeField},
@@ -37,6 +38,8 @@ use snarkos_models::{
     },
 };
 
+use crate::FieldCircuitBuilder;
+use serde::export::PhantomData;
 use std::{borrow::Borrow, cmp::Ordering};
 
 #[derive(Clone, Debug)]
@@ -225,17 +228,17 @@ impl<F: Field + PrimeField> PartialOrd for FieldType<F> {
 }
 
 impl<F: Field + PrimeField> EvaluateEqGadget<F> for FieldType<F> {
-    fn evaluate_equal<CS: ConstraintSystem<F>>(&self, mut _cs: CS, other: &Self) -> Result<Boolean, SynthesisError> {
+    fn evaluate_equal<CS: ConstraintSystem<F>>(&self, mut cs: CS, other: &Self) -> Result<Boolean, SynthesisError> {
         match (self, other) {
             (FieldType::Constant(first), FieldType::Constant(second)) => Ok(Boolean::constant(first.eq(second))),
-            _ => unimplemented!(),
-            // (FieldType::Allocated(first), FieldType::Allocated(second)) => first.evaluate_equal(cs, second),
-            // (FieldType::Constant(constant_value), FieldType::Allocated(allocated_value))
-            // | (FieldType::Allocated(allocated_value), FieldType::Constant(constant_value)) => {
-            //     let allocated_constant_value =
-            //         FpGadget::alloc(&mut cs.ns(|| format!("alloc constant for eq")), || Ok(constant_value))?;
-            //     allocated_value.evaluate_equal(cs, &allocated_constant_value)
-            // }
+            (FieldType::Constant(_), FieldType::Allocated(_)) => unimplemented!(),
+            (FieldType::Allocated(_), FieldType::Constant(_)) => unimplemented!(),
+            (FieldType::Allocated(first), FieldType::Allocated(second)) => {
+                // let builder = FieldCircuitBuilder::
+                let first_std = FieldStd::from((first.clone(), builder));
+
+                unimplemented!()
+            }
         }
     }
 }

@@ -20,3 +20,36 @@ pub mod input;
 
 pub mod field_type;
 pub use self::field_type::*;
+//
+use serde::export::PhantomData;
+use snark_std::{field::Field as FieldStd, traits::CircuitBuilder};
+use snarkos_curves::bls12_377::Fr;
+use snarkos_models::{
+    curves::{Field, PrimeField},
+    gadgets::r1cs::ConstraintSystem,
+};
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
+
+pub struct FieldCircuitBuilder<F: Field + PrimeField, CS: ConstraintSystem<F>>(Rc<RefCell<CS>>, PhantomData<F>);
+
+impl<F: Field + PrimeField, CS: ConstraintSystem<F>> CircuitBuilder<F> for FieldCircuitBuilder<F, CS> {
+    type CS = CS;
+
+    fn borrow_mut(&self) -> RefMut<Self::CS> {
+        self.0.borrow_mut()
+    }
+}
+
+impl<F: Field + PrimeField, CS: ConstraintSystem<F>> Clone for FieldCircuitBuilder<F, CS> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone(), PhantomData)
+    }
+}
+
+// impl<F: Field + PrimeField, CS: ConstraintSystem<F>> FieldCircuitBuilder<F, CS> {
+//     fn new()
+//
+// }
