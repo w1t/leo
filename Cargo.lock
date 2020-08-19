@@ -751,6 +751,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3dcaa9ae7725d12cdb85b3ad99a434db70b468c09ded17e012d86b5c1010f7a7"
 
 [[package]]
+name = "function_name"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88b2afa9b514dc3a75af6cf24d1914e1c7eb6f1b86de849147563548d5c0a0cd"
+dependencies = [
+ "function_name-proc-macro",
+]
+
+[[package]]
+name = "function_name-proc-macro"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6790a8d356d2f65d7972181e866b92a50a87c27d6a48cbe9dbb8be13ca784c7d"
+dependencies = [
+ "proc-macro-crate",
+ "quote 0.6.13",
+ "syn 0.15.44",
+]
+
+[[package]]
 name = "futures"
 version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1144,11 +1164,11 @@ dependencies = [
  "serde",
  "serde_json",
  "snarkos-algorithms",
- "snarkos-curves",
- "snarkos-errors",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-gadgets",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "thiserror",
  "toml",
  "zip",
@@ -1189,13 +1209,14 @@ dependencies = [
  "rand_xorshift",
  "serde",
  "sha2",
- "snarkos-curves",
+ "snark-std",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-dpc",
- "snarkos-errors",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-gadgets",
- "snarkos-models",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-objects",
- "snarkos-utilities",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "thiserror",
 ]
 
@@ -1205,9 +1226,9 @@ version = "0.1.0"
 dependencies = [
  "rand",
  "rand_xorshift",
- "snarkos-errors",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "thiserror",
 ]
 
@@ -1220,10 +1241,10 @@ dependencies = [
  "pest-ast",
  "pest_derive",
  "snarkos-algorithms",
- "snarkos-curves",
- "snarkos-errors",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-gadgets",
- "snarkos-models",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "thiserror",
 ]
 
@@ -1253,13 +1274,13 @@ dependencies = [
  "rand",
  "rand_xorshift",
  "snarkos-algorithms",
- "snarkos-curves",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-dpc",
- "snarkos-errors",
- "snarkos-models",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-objects",
  "snarkos-storage",
- "snarkos-utilities",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "thiserror",
 ]
 
@@ -1273,8 +1294,8 @@ dependencies = [
  "pest",
  "serde",
  "serde_json",
- "snarkos-errors",
- "snarkos-models",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -1759,6 +1780,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "237a5ed80e274dbc66f86bd59c1e25edc039660be53194b5fe0a482e0f2612ea"
 
 [[package]]
+name = "proc-macro-crate"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d6ea3c4595b96363c13943497db34af4460fb474a95c43f4446ad341b8c9785"
+dependencies = [
+ "toml",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "0.4.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2194,6 +2224,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
 
 [[package]]
+name = "snark-std"
+version = "0.1.0"
+source = "git+ssh://git@github.com/AleoHQ/snark-std.git#0d083b632b09c0a2b412ccbaad8b3880de7cdd02"
+dependencies = [
+ "function_name",
+ "num-traits",
+ "snarkos-curves 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "thiserror",
+]
+
+[[package]]
 name = "snarkos-algorithms"
 version = "0.8.0"
 source = "git+ssh://git@github.com/AleoHQ/snarkOS.git#57fef6a27035419e0b22fee5b72ca6639e15e1ac"
@@ -2207,10 +2250,25 @@ dependencies = [
  "rayon",
  "sha2",
  "smallvec",
- "snarkos-errors",
- "snarkos-models",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-profiler",
- "snarkos-utilities",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+]
+
+[[package]]
+name = "snarkos-curves"
+version = "0.8.0"
+source = "git+https://github.com/AleoHQ/snarkOS.git#6d439fa9d1ee53382c29f3bc96e789adf5216a19"
+dependencies = [
+ "derivative",
+ "rand",
+ "rand_xorshift",
+ "rustc_version",
+ "serde",
+ "snarkos-errors 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2223,9 +2281,19 @@ dependencies = [
  "rand_xorshift",
  "rustc_version",
  "serde",
- "snarkos-errors",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+]
+
+[[package]]
+name = "snarkos-derives"
+version = "0.1.0"
+source = "git+https://github.com/AleoHQ/snarkOS.git#6d439fa9d1ee53382c29f3bc96e789adf5216a19"
+dependencies = [
+ "proc-macro2 1.0.19",
+ "quote 1.0.7",
+ "syn 1.0.38",
 ]
 
 [[package]]
@@ -2249,14 +2317,30 @@ dependencies = [
  "itertools 0.9.0",
  "rand",
  "snarkos-algorithms",
- "snarkos-curves",
- "snarkos-errors",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-gadgets",
- "snarkos-models",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-objects",
  "snarkos-parameters",
  "snarkos-profiler",
- "snarkos-utilities",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+]
+
+[[package]]
+name = "snarkos-errors"
+version = "0.8.0"
+source = "git+https://github.com/AleoHQ/snarkOS.git#6d439fa9d1ee53382c29f3bc96e789adf5216a19"
+dependencies = [
+ "base58",
+ "bech32",
+ "bincode",
+ "curl",
+ "hex",
+ "jsonrpc-core",
+ "rocksdb",
+ "thiserror",
+ "toml",
 ]
 
 [[package]]
@@ -2284,10 +2368,26 @@ dependencies = [
  "digest 0.8.1",
  "itertools 0.9.0",
  "snarkos-algorithms",
- "snarkos-curves",
- "snarkos-errors",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+]
+
+[[package]]
+name = "snarkos-models"
+version = "0.8.0"
+source = "git+https://github.com/AleoHQ/snarkOS.git#6d439fa9d1ee53382c29f3bc96e789adf5216a19"
+dependencies = [
+ "bincode",
+ "derivative",
+ "itertools 0.9.0",
+ "rand",
+ "rand_xorshift",
+ "serde",
+ "smallvec",
+ "snarkos-errors 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2302,8 +2402,8 @@ dependencies = [
  "rand_xorshift",
  "serde",
  "smallvec",
- "snarkos-errors",
- "snarkos-utilities",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2321,10 +2421,10 @@ dependencies = [
  "serde",
  "sha2",
  "snarkos-algorithms",
- "snarkos-curves",
- "snarkos-errors",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-curves 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2335,9 +2435,9 @@ dependencies = [
  "curl",
  "hex",
  "snarkos-algorithms",
- "snarkos-errors",
- "snarkos-models",
- "snarkos-utilities",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2357,11 +2457,22 @@ dependencies = [
  "rocksdb",
  "serde",
  "snarkos-algorithms",
- "snarkos-errors",
- "snarkos-models",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-models 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
  "snarkos-objects",
  "snarkos-parameters",
- "snarkos-utilities",
+ "snarkos-utilities 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+]
+
+[[package]]
+name = "snarkos-utilities"
+version = "0.8.0"
+source = "git+https://github.com/AleoHQ/snarkOS.git#6d439fa9d1ee53382c29f3bc96e789adf5216a19"
+dependencies = [
+ "bincode",
+ "rand",
+ "snarkos-derives 0.1.0 (git+https://github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+https://github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
@@ -2371,8 +2482,8 @@ source = "git+ssh://git@github.com/AleoHQ/snarkOS.git#57fef6a27035419e0b22fee5b7
 dependencies = [
  "bincode",
  "rand",
- "snarkos-derives",
- "snarkos-errors",
+ "snarkos-derives 0.1.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
+ "snarkos-errors 0.8.0 (git+ssh://git@github.com/AleoHQ/snarkOS.git)",
 ]
 
 [[package]]
