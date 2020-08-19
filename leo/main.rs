@@ -1,3 +1,19 @@
+// Copyright (C) 2019-2020 Aleo Systems Inc.
+// This file is part of the Leo library.
+
+// The Leo library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// The Leo library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
+
 use leo::{cli::*, commands::*, errors::CLIError};
 
 use clap::{App, AppSettings, Arg};
@@ -5,7 +21,7 @@ use clap::{App, AppSettings, Arg};
 #[cfg_attr(tarpaulin, skip)]
 fn main() -> Result<(), CLIError> {
     let arguments = App::new("leo")
-        .version("v0.1.0")
+        .version("v1.0.0")
         .about("Leo compiler and package manager")
         .author("The Aleo Team <hello@aleo.org>")
         .settings(&[
@@ -35,6 +51,7 @@ fn main() -> Result<(), CLIError> {
             DeployCommand::new().display_order(12),
             CleanCommand::new().display_order(13),
             LintCommand::new().display_order(14),
+            UpdateCommand::new().display_order(15),
         ])
         .set_term_width(0)
         .get_matches();
@@ -55,6 +72,7 @@ fn main() -> Result<(), CLIError> {
         ("deploy", Some(arguments)) => DeployCommand::process(arguments),
         ("clean", Some(arguments)) => CleanCommand::process(arguments),
         ("lint", Some(arguments)) => LintCommand::process(arguments),
+        ("update", Some(arguments)) => UpdateCommand::process(arguments),
         _ => unreachable!(),
     }
 }

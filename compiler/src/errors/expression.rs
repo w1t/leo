@@ -1,3 +1,19 @@
+// Copyright (C) 2019-2020 Aleo Systems Inc.
+// This file is part of the Leo library.
+
+// The Leo library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// The Leo library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
+
 use crate::errors::{AddressError, BooleanError, FieldError, FunctionError, GroupError, IntegerError, ValueError};
 use leo_typed::{Error as FormattedError, Identifier, Span};
 
@@ -51,9 +67,15 @@ impl ExpressionError {
 
     pub fn cannot_enforce(operation: String, error: SynthesisError, span: Span) -> Self {
         let message = format!(
-            "the gadget operation `{}` failed due to synthesis error `{}`",
+            "the gadget operation `{}` failed due to synthesis error `{:?}`",
             operation, error,
         );
+
+        Self::new_from_span(message, span)
+    }
+
+    pub fn cannot_evaluate(operation: String, span: Span) -> Self {
+        let message = format!("Mismatched types found for operation `{}`", operation);
 
         Self::new_from_span(message, span)
     }

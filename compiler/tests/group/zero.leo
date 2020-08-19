@@ -1,3 +1,3 @@
 function main() {
-    let a = 0group;
+    let element = 0group;
 }
