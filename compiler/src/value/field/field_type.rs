@@ -19,7 +19,6 @@
 use crate::errors::FieldError;
 use leo_typed::Span;
 
-use snark_std::field::Field as FieldStd;
 use snarkos_errors::gadgets::SynthesisError;
 use snarkos_models::{
     curves::{Field, PrimeField},
@@ -38,15 +37,8 @@ use snarkos_models::{
     },
 };
 
-use crate::FieldCircuitBuilder;
-use serde::export::PhantomData;
-use snark_std::ops::Equal;
-use std::{
-    borrow::Borrow,
-    cell::{RefCell, RefMut},
-    cmp::Ordering,
-    rc::Rc,
-};
+use crate::evaluate_eq_fp_gadget;
+use std::{borrow::Borrow, cmp::Ordering};
 
 #[derive(Clone, Debug)]
 pub enum FieldType<F: Field + PrimeField> {
@@ -234,24 +226,12 @@ impl<F: Field + PrimeField> PartialOrd for FieldType<F> {
 }
 
 impl<F: Field + PrimeField> EvaluateEqGadget<F> for FieldType<F> {
-    fn evaluate_equal<CS: ConstraintSystem<F>>(&self, mut cs: CS, other: &Self) -> Result<Boolean, SynthesisError> {
+    fn evaluate_equal<CS: ConstraintSystem<F>>(&self, cs: CS, other: &Self) -> Result<Boolean, SynthesisError> {
         match (self, other) {
             (FieldType::Constant(first), FieldType::Constant(second)) => Ok(Boolean::constant(first.eq(second))),
             (FieldType::Constant(_), FieldType::Allocated(_)) => unimplemented!(),
             (FieldType::Allocated(_), FieldType::Constant(_)) => unimplemented!(),
-            (FieldType::Allocated(first), FieldType::Allocated(second)) => {
-                let builder = FieldCircuitBuilder {
-                    0: Rc::new(RefCell::new(cs)),
-                    1: Default::default(),
-                };
-                let first_std = FieldStd::from((first.clone(), builder.clone()));
-                let second_std = FieldStd::from((second.clone(), builder.clone()));
-
-                let result_std = first_std.eq(&second_std).map_err(|_| SynthesisError::Unsatisfiable)?;
-                let result_option = result_std.to_gadget_unsafe();
-
-                result_option.ok_or(SynthesisError::Unsatisfiable)
-            }
+            (FieldType::Allocated(first), FieldType::Allocated(second)) => evaluate_eq_fp_gadget(cs, first, second),
         }
     }
 }

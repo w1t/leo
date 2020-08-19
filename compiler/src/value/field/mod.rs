@@ -22,11 +22,12 @@ pub mod field_type;
 pub use self::field_type::*;
 //
 use serde::export::PhantomData;
-use snark_std::{field::Field as FieldStd, traits::CircuitBuilder};
+use snark_std::{field::Field as FieldStd, ops::Equal, traits::CircuitBuilder};
 use snarkos_curves::bls12_377::Fr;
+use snarkos_errors::gadgets::SynthesisError;
 use snarkos_models::{
     curves::{Field, PrimeField},
-    gadgets::r1cs::ConstraintSystem,
+    gadgets::{curves::FpGadget, r1cs::ConstraintSystem, utilities::boolean::Boolean},
 };
 use std::{
     cell::{RefCell, RefMut},
@@ -49,9 +50,20 @@ impl<F: Field + PrimeField, CS: ConstraintSystem<F>> Clone for FieldCircuitBuild
     }
 }
 
-// impl<F: Field + PrimeField, CS: ConstraintSystem<F>> FieldCircuitBuilder<F, CS> {
-//     pub fn new(cs: CS) -> Self {
-//         Self { 0: Rc::new(RefCell::new(())), 1: Default::default() }
-//     }
-//
-// }
+pub fn evaluate_eq_fp_gadget<F: Field + PrimeField, CS: ConstraintSystem<F>>(
+    cs: CS,
+    a: &FpGadget<F>,
+    b: &FpGadget<F>,
+) -> Result<Boolean, SynthesisError> {
+    let builder = FieldCircuitBuilder {
+        0: Rc::new(RefCell::new(cs)),
+        1: Default::default(),
+    };
+    let a_std = FieldStd::from((a.clone(), builder.clone()));
+    let b_std = FieldStd::from((b.clone(), builder.clone()));
+
+    let result_std = a_std.eq(&b_std).map_err(|_| SynthesisError::Unsatisfiable)?;
+    let result_option = result_std.to_gadget_unsafe();
+
+    result_option.ok_or(SynthesisError::Unsatisfiable)
+}
