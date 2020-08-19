@@ -23,7 +23,6 @@ pub use self::field_type::*;
 //
 use serde::export::PhantomData;
 use snark_std::{field::Field as FieldStd, ops::Equal, traits::CircuitBuilder};
-use snarkos_curves::bls12_377::Fr;
 use snarkos_errors::gadgets::SynthesisError;
 use snarkos_models::{
     curves::{Field, PrimeField},
