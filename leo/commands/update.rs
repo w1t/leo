@@ -61,7 +61,7 @@ impl CLI for UpdateCommand {
     type Options = (bool,);
     type Output = ();
 
-    const ABOUT: AboutType = "Update Leo itself";
+    const ABOUT: AboutType = "Update Leo to the latest version";
     const ARGUMENTS: &'static [ArgumentType] = &[];
     const FLAGS: &'static [FlagType] = &[("--list")];
     const NAME: NameType = "update";
@@ -78,15 +78,15 @@ impl CLI for UpdateCommand {
             (true,) => match UpdateCommand::show_available_releases() {
                 Ok(_) => return Ok(()),
                 Err(e) => {
-                    log::error!("Cannot get Leo version");
-                    log::error!("Log: {}", e);
+                    log::error!("Failed to fetch available versions of Leo");
+                    log::error!("{}", e);
                 }
             },
             (false,) => match UpdateCommand::update_to_latest_release() {
                 Ok(_) => return Ok(()),
                 Err(e) => {
-                    log::error!("Cannot update Leo");
-                    log::error!("Log: {}", e);
+                    log::error!("Failed to update Leo to the latest version");
+                    log::error!("{}", e);
                 }
             },
         }
