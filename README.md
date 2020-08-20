@@ -36,7 +36,20 @@ and checking out the [Aleo Package Manager](https://aleo.pm/).
 
 ## 2. Build Guide
 
-### 2.1 Install Rust
+
+### 2.1 Command Line Install
+
+**via curl**
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/AleoHQ/leo/master/scripts/mac_install.sh)"
+```
+
+**via wget**
+```
+sh -c "$(wget -0- https://raw.githubusercontent.com/AleoHQ/leo/master/scripts/linux_install.sh)"
+```
+
+### 2.2a Install Rust
 
 We recommend installing Rust using [rustup](https://www.rustup.rs/). You can install `rustup` as follows:
 
@@ -52,19 +65,6 @@ We recommend installing Rust using [rustup](https://www.rustup.rs/). You can ins
 - Windows (32-bit):  
   
   Download the [Windows 32-bit executable](https://win.rustup.rs/i686) and follow the on-screen instructions.
-
-### 2.2a Build from Crates.io
-
-We recommend installing Leo this way. In your terminal, run:
-
-```bash
-cargo install leo
-```
-
-Now to use Leo, in your terminal, run:
-```bash
-leo
-```
  
 ### 2.2b Build from Source Code
 
