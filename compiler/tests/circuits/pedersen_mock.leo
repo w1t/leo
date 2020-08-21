@@ -21,7 +21,7 @@ function main() {
     let pedersen = PedersenHash::new(parameters);
     let input: bool[512] = [true; 512];
 
-    let res = pedersen.hash(input);
+    let res: u32 = pedersen.hash(input);
 
     console.assert(res == 0u32);
 }

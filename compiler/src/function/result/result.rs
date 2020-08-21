@@ -43,7 +43,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstrainedProgram<F, G> {
         let return_type = match expected_return {
             Some(return_type) => return_type,
             None => {
-                if results.len() == 0 {
+                if results.is_empty() {
                     return Ok(return_value);
                 } else {
                     return Err(StatementError::invalid_number_of_returns(0, results.len(), span));
