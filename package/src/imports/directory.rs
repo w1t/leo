@@ -64,4 +64,16 @@ impl ImportsDirectory {
 
         Ok(())
     }
+
+    /// Returns `true` if an imported package exists and `false` otherwise.
+    pub fn import_exists(path: &PathBuf, package_name: &str) -> Result<bool, ImportsDirectoryError> {
+        let mut path = path.to_owned();
+        if path.is_dir() && !path.ends_with(IMPORTS_DIRECTORY_NAME) {
+            path.push(PathBuf::from(IMPORTS_DIRECTORY_NAME));
+        }
+
+        path.push(PathBuf::from(package_name));
+
+        Ok(path.exists())
+    }
 }

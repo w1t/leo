@@ -41,4 +41,9 @@ impl LeoPackage {
     pub fn remove_imported_package(package_name: &str, path: &PathBuf) -> Result<(), PackageError> {
         package::Package::remove_imported_package(package_name, path)
     }
+
+    /// Installs a package as an import
+    pub fn install_package(package_name: &str, package_bytes: Vec<u8>, path: &PathBuf) -> Result<(), PackageError> {
+        package::Package::install_package(package_name, package_bytes, path)
+    }
 }

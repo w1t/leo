@@ -16,14 +16,18 @@
 
 use crate::{
     errors::PackageError,
-    imports::ImportsDirectory,
+    imports::{ImportsDirectory, IMPORTS_DIRECTORY_NAME},
     inputs::{InputFile, InputsDirectory, StateFile},
     root::{Gitignore, Manifest, README},
     source::{LibraryFile, MainFile, SourceDirectory},
 };
 
 use serde::Deserialize;
-use std::path::PathBuf;
+use std::{
+    fs::{create_dir_all, remove_dir_all, File},
+    io::{Cursor, Read, Write},
+    path::PathBuf,
+};
 
 #[derive(Deserialize)]
 pub struct Package {
@@ -183,8 +187,51 @@ impl Package {
         Ok(())
     }
 
-    /// Removes the package at the given path
+    /// Removes an imported package from a package at the given path.
     pub fn remove_imported_package(package_name: &str, path: &PathBuf) -> Result<(), PackageError> {
         Ok(ImportsDirectory::remove_import(path, package_name)?)
+    }
+
+    /// Install a package as an import to a package at the given path.
+    pub fn install_package(package_name: &str, pacakge_bytes: Vec<u8>, path: &PathBuf) -> Result<(), PackageError> {
+        // Create the imports directory if it doesn't already exist.
+        ImportsDirectory::create(&path)?;
+
+        let mut import_package_path = path;
+        import_package_path.push(IMPORTS_DIRECTORY_NAME)?;
+        import_package_path.push(package_name);
+
+        // If an imported package with the same name already exists, remove it.
+        if import_package_path.exists() {
+            ImportsDirectory::remove_import(path, package_name)?;
+            create_dir_all(&import_package_path);
+        }
+
+        create_dir_all(&import_package_path);
+
+        let zip_reader = Cursor::new(pacakge_bytes);
+
+        let mut zip_arhive = zip::ZipArchive::new(zip_reader)?;
+
+        for i in 0..zip_arhive.len() {
+            let file = zip_arhive.by_index(i)?;
+
+            let file_name = file.name();
+
+            let mut file_path = path.clone();
+            file_path.push(file_name);
+
+            if file_name.ends_with("/") {
+                create_dir_all(file_path)?;
+            } else {
+                if let Some(parent_directory) = path.parent() {
+                    create_dir_all(parent_directory)?;
+                }
+
+                File::create(file_path)?.write_all(&file.bytes().map(|e| e.unwrap()).collect::<Vec<u8>>())?;
+            }
+        }
+
+        OK(())
     }
 }

@@ -86,3 +86,9 @@ impl From<crate::errors::MainFileError> for PackageError {
         PackageError::Crate("leo-package", format!("{}", error))
     }
 }
+
+impl From<zip::result::ZipError> for PackageError {
+    fn from(error: zip::result::ZipError) -> Self {
+        PackageError::Crate("zip", format!("{}", error))
+    }
+}
