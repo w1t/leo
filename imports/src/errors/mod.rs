@@ -13,6 +13,6 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-/// The import store brings an imported symbol into the main program from an import program struct
-pub mod store;
-pub use self::store::*;
+
+pub mod import_parser;
+pub use self::import_parser::*;

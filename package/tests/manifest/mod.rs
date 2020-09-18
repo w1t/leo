@@ -14,15 +14,4 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{errors::ImportError, ImportParser};
-use leo_typed::Package;
-
-pub static CORE_PACKAGE_NAME: &str = "core";
-
-impl ImportParser {
-    // import a core package into scope
-    pub fn parse_core_package(&mut self, package: &Package) -> Result<(), ImportError> {
-        self.insert_core_package(package);
-        Ok(())
-    }
-}
+pub mod manifest;

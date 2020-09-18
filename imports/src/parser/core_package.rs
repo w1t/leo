@@ -13,6 +13,16 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-/// The import store brings an imported symbol into the main program from an import program struct
-pub mod store;
-pub use self::store::*;
+
+use crate::{errors::ImportParserError, ImportParser};
+use leo_typed::Package;
+
+pub static CORE_PACKAGE_NAME: &str = "core";
+
+impl ImportParser {
+    // import a core package into scope
+    pub fn parse_core_package(&mut self, package: &Package) -> Result<(), ImportParserError> {
+        self.insert_core_package(package);
+        Ok(())
+    }
+}
