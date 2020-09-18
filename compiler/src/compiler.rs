@@ -37,6 +37,7 @@ use snarkos_models::{
     gadgets::r1cs::{ConstraintSynthesizer, ConstraintSystem},
 };
 
+use leo_resolver::LeoResolvedAst;
 use sha2::{Digest, Sha256};
 use std::{fs, marker::PhantomData, path::PathBuf};
 
@@ -158,6 +159,8 @@ impl<F: Field + PrimeField, G: GroupType<F>> Compiler<F, G> {
 
         // Use the typed parser to construct the typed syntax tree.
         let typed_tree = LeoTypedAst::new(&package_name, &ast);
+
+        let _resolved_tree = LeoResolvedAst::new(typed_tree.clone());
 
         self.program = typed_tree.into_repr();
         self.imported_programs = ImportParser::parse(&self.program)?;

@@ -1238,6 +1238,7 @@ dependencies = [
  "leo-gadgets",
  "leo-input",
  "leo-package",
+ "leo-resolver",
  "leo-state",
  "leo-typed",
  "num-bigint",
@@ -1321,6 +1322,7 @@ dependencies = [
  "leo-gadgets",
  "leo-input",
  "leo-package",
+ "leo-resolver",
  "leo-state",
  "notify",
  "num-bigint",
@@ -1360,6 +1362,13 @@ dependencies = [
  "tracing",
  "walkdir",
  "zip",
+]
+
+[[package]]
+name = "leo-resolver"
+version = "1.0.3"
+dependencies = [
+ "leo-typed",
 ]
 
 [[package]]

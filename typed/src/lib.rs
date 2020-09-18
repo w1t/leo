@@ -32,8 +32,8 @@ pub use self::console::*;
 pub mod errors;
 pub use self::errors::*;
 
-pub mod expression;
-pub use self::expression::*;
+pub mod expressions;
+pub use self::expressions::*;
 
 pub mod functions;
 pub use self::functions::*;
@@ -47,8 +47,8 @@ pub use self::imports::*;
 pub mod input;
 pub use self::input::*;
 
-pub mod program;
-pub use self::program::*;
+pub mod programs;
+pub use self::programs::*;
 
 pub mod statements;
 pub use self::statements::*;
@@ -60,7 +60,7 @@ use leo_ast::LeoAst;
 
 use serde_json;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LeoTypedAst {
     typed_ast: Program,
 }
