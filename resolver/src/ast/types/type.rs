@@ -13,3 +13,27 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
+use leo_typed::{Identifier, IntegerType};
+use serde::{Deserialize, Serialize};
+
+/// The type of an identifier in a Leo program. Cannot be implicit.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Type {
+    // Data types
+    Address,
+    Boolean,
+    Field,
+    Group,
+    IntegerType(IntegerType),
+
+    // Data type wrappers
+    Array(Box<Type>, Vec<usize>),
+    Tuple(Vec<Type>),
+
+    // User defined types
+    Circuit(Identifier),
+    Function(Identifier),
+
+    // Keywords
+    SelfType,
+}

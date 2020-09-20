@@ -13,11 +13,31 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-pub mod entry;
-pub use self::entry::*;
+use crate::ast::Attribute;
+use leo_typed::{Circuit, Identifier, Type};
 
-pub mod program_symbol_table;
-pub use self::program_symbol_table::*;
+use std::convert::TryFrom;
 
-pub mod symbol_table;
-pub use self::symbol_table::*;
+/// A symbol table entry stores the type and attribute information for an identifier
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct Entry {
+    identifier: Identifier,
+    type_: Type,
+    attributes: Vec<Attribute>,
+}
+
+impl TryFrom<Circuit> for Entry {
+    type Error = ();
+
+    fn try_from(value: Circuit) -> Result<Self, Self::Error> {
+        let identifier = value.circuit_name;
+        let type_ = Type::from(identifier.clone());
+        let attributes = vec![];
+
+        Ok(Entry {
+            identifier,
+            type_,
+            attributes,
+        })
+    }
+}

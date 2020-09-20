@@ -18,6 +18,7 @@ use crate::errors::{FunctionError, ImportError, OutputBytesError, OutputFileErro
 use leo_ast::ParserError;
 use leo_imports::ImportParserError;
 use leo_input::InputParserError;
+use leo_resolver::ResolverError;
 use leo_state::LocalDataVerificationError;
 
 use bincode::Error as SerdeError;
@@ -63,6 +64,9 @@ pub enum CompilerError {
 
     #[error("{}", _0)]
     ParserError(#[from] ParserError),
+
+    #[error("{}", _0)]
+    ResolverError(#[from] ResolverError),
 
     #[error("{}", _0)]
     SerdeError(#[from] SerdeError),

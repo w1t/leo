@@ -14,24 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-//! A resolved syntax tree is represented as a `Program` without implicit type literals.
+#[macro_use]
+extern crate thiserror;
+
 pub mod ast;
 pub use self::ast::*;
 
 pub mod errors;
 pub use self::errors::*;
 
+pub mod resolver;
+pub use self::resolver::*;
+
 pub mod symbol_table;
 pub use self::symbol_table::*;
-
-use leo_typed::LeoTypedAst;
-
-#[derive(Debug, Eq, PartialEq)]
-pub struct LeoResolvedAst {
-    // resolved_ast:
-}
-
-impl LeoResolvedAst {
-    /// Creates a new resolved syntax tree from a given typed syntax tree
-    pub fn new(program: LeoTypedAst) {}
-}

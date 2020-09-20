@@ -13,3 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
+
+/// A Leo program with resolved types and semantic analysis
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Program {}

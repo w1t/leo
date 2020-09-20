@@ -13,11 +13,10 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-pub mod entry;
-pub use self::entry::*;
 
-pub mod program_symbol_table;
-pub use self::program_symbol_table::*;
-
-pub mod symbol_table;
-pub use self::symbol_table::*;
+/// Stores additional data attached to an identifier
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Attribute {
+    Mutable,
+    Static,
+}

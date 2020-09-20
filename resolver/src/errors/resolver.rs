@@ -13,11 +13,15 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-pub mod entry;
-pub use self::entry::*;
 
-pub mod program_symbol_table;
-pub use self::program_symbol_table::*;
+use leo_imports::ImportParserError;
+use leo_typed::{Error as FormattedError, Span};
 
-pub mod symbol_table;
-pub use self::symbol_table::*;
+#[derive(Debug, Error)]
+pub enum ResolverError {
+    #[error("{}", _0)]
+    Error(#[from] FormattedError),
+
+    #[error("{}", _0)]
+    ImportParserError(#[from] ImportParserError),
+}
