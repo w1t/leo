@@ -13,10 +13,10 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::ast::Attribute;
-use leo_typed::{Circuit, Identifier, Type};
+use crate::ast::{Attribute, Type};
+use leo_typed::{Circuit, Function, Identifier};
 
-use std::convert::TryFrom;
+use std::{convert::TryFrom, fmt};
 
 /// A symbol table entry stores the type and attribute information for an identifier
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -31,7 +31,7 @@ impl TryFrom<Circuit> for Entry {
 
     fn try_from(value: Circuit) -> Result<Self, Self::Error> {
         let identifier = value.circuit_name;
-        let type_ = Type::from(identifier.clone());
+        let type_ = Type::Circuit(identifier.clone());
         let attributes = vec![];
 
         Ok(Entry {
@@ -39,5 +39,27 @@ impl TryFrom<Circuit> for Entry {
             type_,
             attributes,
         })
+    }
+}
+
+impl TryFrom<Function> for Entry {
+    type Error = ();
+
+    fn try_from(value: Function) -> Result<Self, Self::Error> {
+        let identifier = value.identifier;
+        let type_ = Type::Function(identifier.clone());
+        let attributes = vec![];
+
+        Ok(Entry {
+            identifier,
+            type_,
+            attributes,
+        })
+    }
+}
+
+impl fmt::Display for Entry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.identifier)
     }
 }

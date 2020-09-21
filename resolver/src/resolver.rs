@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Program, ProgramSymbolTable, ResolverError, SymbolTable};
+use crate::{Program, ResolverError, SymbolTable};
 use leo_imports::ImportParser;
 use leo_typed::LeoTypedAst;
 
@@ -34,14 +34,28 @@ impl LeoResolvedAst {
         //todo: load main function `input` register and state file types
 
         // Create a symbol table for main.leo
+        let mut symbol_table = SymbolTable::new(None);
 
         // Pass 1: Insert all in-scope identifiers into the symbol table
-        // let symbol_table = ProgramSymbolTable::new(program);
+        symbol_table.insert_program(&program);
 
         // Pass 2: Perform semantic analysis on program
+        // At each AST node:
+        //    1. Resolve all child AST nodes
+        //    2. Resolve current AST node
+        let resolved_ast = Program::resolve(&mut symbol_table, program).unwrap();
 
-        Ok(LeoResolvedAst {
-            resolved_ast: Program {},
-        })
+        Ok(LeoResolvedAst { resolved_ast })
     }
+}
+
+/// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types
+pub trait ResolvedNode {
+    type UnresolvedNode;
+    type Error;
+
+    /// Returns a resolved AST representation given an unresolved AST representation and symbol table
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error>
+    where
+        Self: std::marker::Sized;
 }

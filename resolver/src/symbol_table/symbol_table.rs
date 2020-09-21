@@ -14,10 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::Entry;
-use leo_typed::Type;
+use crate::{CircuitType, Entry, FunctionType};
+use leo_typed::{Identifier, Program, Type};
 
+use leo_imports::ImportParser;
 use std::collections::HashMap;
+
+use std::convert::TryFrom;
 
 /// A abstract data type that tracks the current bindings of identifier names in a Leo program
 /// A symbol table has access to all function and circuit names in its parent's symbol table
@@ -27,12 +30,11 @@ pub struct SymbolTable {
     /// Maps variable name -> (location, type, attributes)
     variables: HashMap<String, Entry>,
 
-    /// Maps function name -> (location, input types, output types, attributes)
-    functions: HashMap<String, Entry>,
+    /// Maps circuit name -> (location, inputs, outputs)
+    circuits: HashMap<Identifier, CircuitType>,
 
-    /// Maps circuit name -> (location,
-    circuits: HashMap<String, Entry>,
-
+    // ///Maps function name -> (location, variables, functions)
+    // functions: HashMap<Identifier, FunctionType>,
     /// The parent of this symbol table
     parent: Option<Box<SymbolTable>>,
 
@@ -44,20 +46,76 @@ impl SymbolTable {
     /// Creates a new symbol table with a given parent symbol table
     pub fn new(parent: Option<Box<SymbolTable>>) -> Self {
         SymbolTable {
-            table: HashMap::new(),
+            variables: HashMap::new(),
+            circuits: HashMap::new(),
             parent,
             children: vec![],
         }
     }
 
     /// Insert an identifier into the symbol table
-    pub fn insert(&mut self, key: String, value: Entry) -> Option<Entry> {
-        self.table.insert(key, value)
+    pub fn insert_variable(&mut self, key: String, value: Entry) -> Option<Entry> {
+        self.variables.insert(key, value)
     }
 
-    /// Adds a pointer to a child symbol table.
+    /// Get the current binding of an identifier
+    pub fn get_variable(&self, key: &String) -> Option<&Entry> {
+        self.variables.get(key)
+    }
+
+    /// Insert a circuit definition into the symbol table
+    pub fn insert_circuit(&mut self, key: Identifier, value: CircuitType) -> Option<CircuitType> {
+        self.circuits.insert(key, value)
+    }
+
+    /// Adds a pointer to a child symbol table
     /// Children have access to identifiers in the current symbol table
     pub fn add_child(&mut self, child: SymbolTable) {
         self.children.push(child)
+    }
+
+    /// Inserts all imported identifiers for a given list of imported programs
+    /// No type resolution performed at this step
+    pub fn insert_imports(&mut self, _imports: ImportParser) {}
+
+    /// Inserts all circuits and functions as variable types
+    /// `let f = Foo { }; // f has type circuit Foo`
+    pub fn insert_variables(&mut self, program: &Program) {
+        // insert program circuits
+        program.circuits.iter().for_each(|(identifier, circuit)| {
+            let duplicate = self.insert_variable(identifier.to_string(), Entry::try_from(circuit.clone()).unwrap());
+            // TODO: throw error for duplicate circuit names
+            if duplicate.is_some() {
+                unimplemented!("ERROR: duplicate circuit definition `{}`", duplicate.unwrap());
+            }
+        });
+
+        // insert program functions
+        program.functions.iter().for_each(|(identifier, function)| {
+            let duplicate = self.insert_variable(identifier.to_string(), Entry::try_from(function.clone()).unwrap());
+            // TODO: throw error for duplicate function names
+            if duplicate.is_some() {
+                unimplemented!("ERROR: duplicate function definition `{}`", duplicate.unwrap());
+            }
+        });
+    }
+
+    /// Inserts all circuits and functions as their respective types with additional information
+    /// Type resolution for circuit and function signatures completed during this step
+    pub fn insert_definitions(&mut self, program: &Program) {
+        // insert program circuit types
+        program.circuits.iter().for_each(|(identifier, unresolved_circuit)| {
+            CircuitType::insert_definition(self, unresolved_circuit.clone());
+        })
+    }
+
+    /// Inserts all function and circuit identifiers for a given program
+    /// No type resolution performed at this step
+    pub fn insert_program(&mut self, program: &Program) {
+        // Pass 1: Insert circuits and functions as types
+        self.insert_variables(program);
+
+        // Pass 2: Insert circuits and functions as definitions
+        self.insert_definitions(program);
     }
 }

@@ -29,6 +29,12 @@ version = "1.0.3"
 path = "../typed"
 version = "1.0.3"
 
+[dependencies.serde]
+version = "1.0"
+
+[dependencies.serde_json]
+version = "1.0"
+
 [dependencies.thiserror]
 version = "1.0"
 #

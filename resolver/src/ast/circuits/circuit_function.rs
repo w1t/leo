@@ -14,11 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-// pub mod circuit;
-// pub use self::circuit::*;
-//
-// pub mod circuit_function;
-// pub use self::circuit_function::*;
-//
-// pub mod circuit_variable;
-// pub use self::circuit_variable::*;
+use crate::{function::FunctionType, Attribute};
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct CircuitFunctionType {
+    /// The function signature of the circuit member function
+    pub function: FunctionType,
+    /// The attributes of the circuit member function
+    pub attributes: Vec<Attribute>,
+}

@@ -17,8 +17,14 @@
 pub mod address;
 pub use self::address::*;
 
+pub mod circuits;
+pub use self::circuits::*;
+
 pub mod fields;
 pub use self::fields::*;
+
+pub mod functions;
+pub use self::functions::*;
 
 pub mod groups;
 pub use self::groups::*;

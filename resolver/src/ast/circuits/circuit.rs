@@ -14,11 +14,30 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use serde::{Deserialize, Serialize};
+use crate::{
+    circuits::{CircuitFunctionType, CircuitVariableType},
+    ResolvedNode, SymbolTable,
+};
+use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier};
 
-/// Stores additional data attached to an identifier
+use serde::{Deserialize, Serialize};
+use std::fmt;
+
+/// A resolved circuit definition.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Attribute {
-    Mutable,
-    Static,
+pub struct Circuit {
+    /// The name of the circuit definition
+    pub identifier: Identifier,
+    /// The circuit member variables
+    pub variables: Vec<CircuitVariableType>,
+    /// The circuit member functions
+    pub functions: Vec<CircuitFunctionType>,
+}
+
+impl ResolvedNode for Circuit {
+    type Error = ();
+    type UnresolvedNode = UnresolvedCircuit;
+
+    /// Returns a resolved circuit AST given an unresolved circuit AST
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {}
 }

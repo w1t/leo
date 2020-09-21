@@ -208,13 +208,6 @@ impl<'ast> From<InputAstType<'ast>> for Type {
     }
 }
 
-// leo-resolved
-impl From<Identifier> for Type {
-    fn from(identifier: Identifier) -> Self {
-        Ty
-    }
-}
-
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {

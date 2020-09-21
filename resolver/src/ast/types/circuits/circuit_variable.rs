@@ -14,11 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
+use crate::{Attribute, Type};
+use leo_typed::{Identifier, Type as UnresolvedType};
+
 use serde::{Deserialize, Serialize};
 
-/// Stores additional data attached to an identifier
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Attribute {
-    Mutable,
-    Static,
+pub struct CircuitVariableType {
+    /// The name of the circuit member variable
+    pub identifier: Identifier,
+    /// The type of the circuit member variable
+    pub type_: Type,
+    /// The attributes of the circuit member variable
+    pub attributes: Vec<Attribute>,
 }
+
+// impl CircuitVariableType {
+//     pub fn from_unresolved(
+//         circuit_name: Identifier,
+//         mutable: bool,
+//         identifier: Identifier,
+//         unresolved_type: UnresolvedType,
+//     ) -> Self {
+//         let resolved_type = Type::from_unresolved_circuit_type(circuit_name, unresolved_type).unwrap();
+//     }
+// }
