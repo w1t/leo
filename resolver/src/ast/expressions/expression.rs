@@ -87,7 +87,12 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::Le(lhs, rhs, span) => Self::le(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Lt(lhs, rhs, span) => Self::lt(table, expected_type, *lhs, *rhs, span),
 
-            // Relational Operators
+            // Conditionals
+            UnresolvedExpression::IfElse(cond, first, second, span) => {
+                Self::conditional(table, expected_type, *cond, *first, *second, span)
+            }
+
+            // Arrays
             _ => return Err(()),
         }
     }
