@@ -54,8 +54,8 @@ impl LeoResolvedAst {
 
 /// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types
 pub trait ResolvedNode {
-    type UnresolvedNode;
     type Error;
+    type UnresolvedNode;
 
     /// Returns a resolved AST representation given an unresolved AST representation and symbol table
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error>

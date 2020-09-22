@@ -114,7 +114,7 @@ impl FunctionInputType {
     pub fn insert(&self, table: &mut SymbolTable) -> Option<Entry> {
         match self {
             FunctionInputType::Variable(variable) => variable.insert(table),
-            FunctionInputType::InputKeyword(identifier) => {
+            FunctionInputType::InputKeyword(_identifier) => {
                 unimplemented!("uncomment when support for input types is added")
             }
         }

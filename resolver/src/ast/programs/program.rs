@@ -16,12 +16,14 @@
 
 use crate::{Function, ResolvedNode, SymbolTable};
 use leo_typed::{programs::Program as TypedProgram, Identifier};
+
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub static MAIN_FUNCTION_NAME: &str = "main";
 
 /// A Leo program with resolved types and semantic analysis
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Program {
     // pub imports: Vec<Import>,
     // pub circuits: HashMap<Identifier, Circuit>,
@@ -48,7 +50,7 @@ impl ResolvedNode for Program {
 
         // Resolve function statements
         unresolved.functions.into_iter().for_each(|(identifier, function)| {
-            let resolved_function = Function::resolve().unwrap();
+            let resolved_function = Function::resolve(table, function).unwrap();
 
             functions.insert(identifier, resolved_function);
         });

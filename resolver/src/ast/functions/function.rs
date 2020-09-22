@@ -14,13 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{FunctionInputType, FunctionType, ResolvedNode, Statement, SymbolTable};
-use leo_typed::{Function as UnresolvedFunction, Identifier};
+use crate::{FunctionType, ResolvedNode, Statement, SymbolTable};
+use leo_typed::Function as UnresolvedFunction;
 
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Function {
     /// The name of the function definition
     pub type_: FunctionType,
@@ -38,7 +37,7 @@ impl ResolvedNode for Function {
         let type_ = table.get_function(&identifier).unwrap();
 
         // Create function context
-        let mut child_table = SymbolTable::new(Some(table.clone()));
+        let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
 
         // Insert function inputs into symbol table
         for input in type_.inputs.clone() {
@@ -52,7 +51,7 @@ impl ResolvedNode for Function {
 
         // Resolve all function statements
         for (_i, unresolved_statement) in unresolved.statements.into_iter().enumerate() {
-            let statement = Statement::resolve(table, (output.clone(), unresolved_statement)).unwrap();
+            let statement = Statement::resolve(&mut child_table, (output.clone(), unresolved_statement)).unwrap();
 
             statements.push(statement);
         }

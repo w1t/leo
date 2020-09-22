@@ -14,14 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod arithmetic;
-pub use self::arithmetic::*;
+use crate::{Expression, ExpressionValue, Type};
+use leo_typed::{IntegerType, Span};
 
-pub mod expression;
-pub use self::expression::*;
+impl Expression {
+    /// Resolve an integer expression
+    pub(crate) fn integer(
+        expected_type: Option<Type>,
+        integer_type: IntegerType,
+        integer_string: String,
+        span: Span,
+    ) -> Result<Self, ()> {
+        let type_ = Type::IntegerType(integer_type);
 
-pub mod identifiers;
-pub use self::identifiers::*;
+        // Check the expected type if given
+        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
 
-pub mod values;
-pub use self::values::*;
+        Ok(Expression {
+            type_,
+            value: ExpressionValue::Address(integer_string, span),
+        })
+    }
+}

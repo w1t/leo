@@ -96,11 +96,10 @@ impl Type {
             unresolved => Type::from_unresolved(table, unresolved),
         }
     }
-}
 
-impl Option<Type> {
-    pub fn check_type(&self, actual: &Type, span: Span) -> Result<(), ()> {
-        if let Some(expected) = self {
+    /// Returns true if the the expected type is not `None` && expected type == actual type
+    pub fn check_type(expected_option: &Option<Self>, actual: &Type, _span: Span) -> Result<(), ()> {
+        if let Some(expected) = expected_option {
             if expected.ne(&actual) {
                 // TODO: throw mismatched type error
                 unimplemented!("ERROR: mismatched types")

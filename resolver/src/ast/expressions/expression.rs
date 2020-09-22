@@ -17,7 +17,9 @@
 use crate::{ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, GroupValue, Identifier, IntegerType, Span};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ExpressionValue {
     // Identifier
     Identifier(Identifier),
@@ -30,60 +32,60 @@ pub enum ExpressionValue {
     Integer(IntegerType, String, Span),
 
     // Number operations
-    Add(Expression, Expression),
-    Sub(Expression, Expression),
-    Mul(Expression, Expression),
-    Div(Expression, Expression),
-    Pow(Expression, Expression),
+    Add(Box<Expression>, Box<Expression>, Span),
+    Sub(Box<Expression>, Box<Expression>, Span),
+    Mul(Box<Expression>, Box<Expression>, Span),
+    Div(Box<Expression>, Box<Expression>, Span),
+    Pow(Box<Expression>, Box<Expression>, Span),
+    Negate(Box<Expression>, Span),
 
     // Boolean operations
-    Not(Expression, Span),
-    Negate(Expression, Span),
-    Or(Expression, Expression, Span),
-    And(Expression, Expression, Span),
-    Eq(Expression, Expression, Span),
-    Ge(Expression, Expression, Span),
-    Gt(Expression, Expression, Span),
-    Le(Expression, Expression, Span),
-    Lt(Expression, Expression, Span),
+    Not(Box<Expression>, Span),
+    Or(Box<Expression>, Box<Expression>, Span),
+    And(Box<Expression>, Box<Expression>, Span),
+    Eq(Box<Expression>, Box<Expression>, Span),
+    Ge(Box<Expression>, Box<Expression>, Span),
+    Gt(Box<Expression>, Box<Expression>, Span),
+    Le(Box<Expression>, Box<Expression>, Span),
+    Lt(Box<Expression>, Box<Expression>, Span),
 
     // Conditionals
     // (conditional, first_value, second_value, span)
-    IfElse(Expression, Expression, Expression, Span),
+    IfElse(Box<Expression>, Box<Expression>, Box<Expression>, Span),
 
     // Arrays
     // (array_elements, span)
-    Array(Vec<Expression>, Span),
-    // (array_name, range, span),
-    // ArrayAccess(Expression, RangeOrExpression, Span)
+    // Array(Vec<Box<SpreadOrExpression>>, Span),
+    // (array_name, range, span)
+    // ArrayAccess(Box<Expression>, Box<RangeOrExpression>, Span),
 
     // Tuples
     // (tuple_elements, span)
     Tuple(Vec<Expression>, Span),
     // (tuple_name, index, span)
-    TupleAccess(Expression, usize, Span),
+    TupleAccess(Box<Expression>, usize, Span),
 
     // Circuits
     // (defined_circuit_name, circuit_members, span)
     // Circuit(Identifier, Vec<CircuitVariableDefinition>, Span),
-    // (declared_circuit_name, circuit_member_name, span)
-    CircuitMemberAccess(Expression, Identifier, Span),
-    // (defined_circuit_name, circuit_static_function_name, span)
-    CircuitStaticFunctionAccess(Expression, Identifier, Span),
+    // (declared_circuit name, circuit_member_name, span)
+    CircuitMemberAccess(Box<Expression>, Identifier, Span),
+    // (defined_circuit name, circuit_static_function_name, span)
+    CircuitStaticFunctionAccess(Box<Expression>, Identifier, Span),
 
     // Functions
     // (declared_function_name, function_arguments, span)
-    FunctionCall(Expression, Vec<Expression>, Span),
+    FunctionCall(Box<Expression>, Vec<Expression>, Span),
     // (core_function_name, function_arguments, span)
     CoreFunctionCall(String, Vec<Expression>, Span),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Expression {
     /// The type this expression evaluates to
-    type_: Type,
+    pub(crate) type_: Type,
     /// The value of this expression
-    value: ExpressionValue,
+    pub(crate) value: ExpressionValue,
 }
 
 impl Expression {
@@ -92,112 +94,25 @@ impl Expression {
         &self.type_
     }
 
-    /// Resolve the type of an identifier expression
-    fn resolve_identifier(
+    /// Resolve a binary expression from left to right.
+    /// If no expected type is given, then the expression resolves to the lhs type.
+    pub(crate) fn binary(
         table: &mut SymbolTable,
-        expected_type: Option<Type>,
-        identifier: Identifier,
-    ) -> Result<Self, ()> {
-        // Lookup identifier in symbol table
-        let variable = table.get_variable(&identifier.name).unwrap();
+        mut expected_type: Option<Type>,
+        lhs: UnresolvedExpression,
+        rhs: UnresolvedExpression,
+        _span: Span,
+    ) -> Result<(Self, Self), ()> {
+        // Resolve lhs with expected type
+        let lhs_resolved = Expression::resolve(table, (expected_type, lhs)).unwrap();
 
-        // Get type of symbol table entry
-        let variable_type = variable.type_();
-        let span = identifier.span.clone();
+        // Set the expected type to the lhs type
+        expected_type = Some(lhs_resolved.type_.clone());
 
-        // Check the expected type if given
-        expected_type.check_type(variable_type, span).unwrap();
+        // Resolve the rhs with expected type
+        let rhs_resolved = Expression::resolve(table, (expected_type, rhs)).unwrap();
 
-        Ok(Expression {
-            type_: variable_type.clone(),
-            value: ExpressionValue::Identifier(identifier),
-        })
-    }
-
-    /// Resolve an address expression
-    fn resolve_address(expected_type: Option<Type>, address_string: String, span: span) -> Result<Self, ()> {
-        let type_ = Type::Address;
-
-        // Check the expected type if given
-        expected_type.check_type(&type_, span.clone()).unwrap();
-
-        Ok(Expression {
-            type_,
-            value: ExpressionValue::Address(address_string, span),
-        })
-    }
-
-    /// Resolve an boolean expression
-    fn resolve_boolean(expected_type: Option<Type>, boolean_string: String, span: span) -> Result<Self, ()> {
-        let type_ = Type::Boolean;
-
-        // Check the expected type if given
-        expected_type.check_type(&type_, span.clone()).unwrap();
-
-        Ok(Expression {
-            type_,
-            value: ExpressionValue::Boolean(boolean_string, span),
-        })
-    }
-
-    /// Resolve an field expression
-    fn resolve_field(expected_type: Option<Type>, field_string: String, span: span) -> Result<Self, ()> {
-        let type_ = Type::Field;
-
-        // Check the expected type if given
-        expected_type.check_type(&type_, span.clone()).unwrap();
-
-        Ok(Expression {
-            type_,
-            value: ExpressionValue::Field(field_string, span),
-        })
-    }
-
-    /// Resolve an group expression
-    fn resolve_group(expected_type: Option<Type>, group_value: GroupValue) -> Result<Self, ()> {
-        let type_ = Type::Group;
-        let span = group_value.span();
-
-        // Check the expected type if given
-        expected_type.check_type(&type_, span.clone()).unwrap();
-
-        Ok(Expression {
-            type_,
-            value: ExpressionValue::Group(group_value),
-        })
-    }
-
-    /// Resolve an implicit expression
-    fn resolve_implicit(_expected_type: Option<Type>, _implicit_string: String, _span: span) -> Result<Self, ()> {
-        // let type_ = Type::Address;
-        //
-        // // Check the expected type if given
-        // expected_type.check_type(&type_, span.clone()).unwrap();
-        //
-        // Ok(Expression {
-        //     type_,
-        //     value: ExpressionValue::Address(implicit_string, span)
-        // })
-
-        Err(())
-    }
-
-    /// Resolve an integer expression
-    fn resolve_integer(
-        expected_type: Option<Type>,
-        integer_type: IntegerType,
-        integer_string: String,
-        span: span,
-    ) -> Result<Self, ()> {
-        let type_ = Type::IntegerType(integer_type);
-
-        // Check the expected type if given
-        expected_type.check_type(&type_, span.clone()).unwrap();
-
-        Ok(Expression {
-            type_,
-            value: ExpressionValue::Address(integer_string, span),
-        })
+        Ok((lhs_resolved, rhs_resolved))
     }
 }
 
@@ -211,14 +126,26 @@ impl ResolvedNode for Expression {
         let expression = unresolved.1;
 
         match expression {
-            UnresolvedExpression::Identifier(identifier) => Self::resolve_identifier(table, expected_type, identifier),
-            UnresolvedExpression::Address(string, span) => Self::resolve_address(expected_type, string, span),
-            UnresolvedExpression::Boolean(string, span) => Self::resolve_boolean(expected_type, string, span),
-            UnresolvedExpression::Field(string, span) => Self::resolve_field(expected_type, string, span),
-            UnresolvedExpression::Group(group_value) => Self::resolve_group(expected_type, group_value),
+            // Identifier
+            UnresolvedExpression::Identifier(identifier) => Self::identifier(table, expected_type, identifier),
+
+            // Values
+            UnresolvedExpression::Address(string, span) => Self::address(expected_type, string, span),
+            UnresolvedExpression::Boolean(string, span) => Self::boolean(expected_type, string, span),
+            UnresolvedExpression::Field(string, span) => Self::field(expected_type, string, span),
+            UnresolvedExpression::Group(group_value) => Self::group(expected_type, group_value),
+            UnresolvedExpression::Implicit(string, span) => Self::implicit(expected_type, string, span),
             UnresolvedExpression::Integer(integer_type, string, span) => {
-                Self::resolve_integer(expected_type, integer_type, string, span)
+                Self::integer(expected_type, integer_type, string, span)
             }
+
+            // Number Operations
+            UnresolvedExpression::Add(lhs, rhs, span) => Self::add(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Sub(lhs, rhs, span) => Self::sub(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Mul(lhs, rhs, span) => Self::mul(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Div(lhs, rhs, span) => Self::div(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Pow(lhs, rhs, span) => Self::pow(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Negate(expression, span) => Self::negate(table, expected_type, *expression, span),
 
             _ => return Err(()),
         }

@@ -33,7 +33,7 @@ use leo_input::values::{
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GroupCoordinate {
     Number(String, Span),
     SignHigh,

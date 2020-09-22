@@ -14,14 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod arithmetic;
-pub use self::arithmetic::*;
+use crate::{Expression, ExpressionValue, SymbolTable, Type};
+use leo_typed::{Expression as UnresolvedExpression, Span};
 
-pub mod expression;
-pub use self::expression::*;
+impl Expression {
+    /// Resolve the type of dividing `lhs / rhs`
+    pub(crate) fn div(
+        table: &mut SymbolTable,
+        expected_type: Option<Type>,
+        lhs: UnresolvedExpression,
+        rhs: UnresolvedExpression,
+        span: Span,
+    ) -> Result<Self, ()> {
+        // Resolve lhs and rhs expressions
+        let (lhs_resolved, rhs_resolved) = Self::binary(table, expected_type, lhs, rhs, span.clone()).unwrap();
 
-pub mod identifiers;
-pub use self::identifiers::*;
-
-pub mod values;
-pub use self::values::*;
+        Ok(Expression {
+            type_: lhs_resolved.type_.clone(),
+            value: ExpressionValue::Div(Box::new(lhs_resolved), Box::new(rhs_resolved), span),
+        })
+    }
+}

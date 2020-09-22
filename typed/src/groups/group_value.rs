@@ -29,7 +29,7 @@ use leo_input::values::{
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GroupValue {
     Single(String, Span),
     Tuple(GroupTuple),
@@ -82,7 +82,7 @@ impl fmt::Display for GroupValue {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct GroupTuple {
     pub x: GroupCoordinate,
     pub y: GroupCoordinate,

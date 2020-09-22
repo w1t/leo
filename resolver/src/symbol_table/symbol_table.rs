@@ -20,7 +20,7 @@ use leo_typed::{Identifier, Program};
 use leo_imports::ImportParser;
 use std::collections::HashMap;
 
-use std::{cell::RefCell, convert::TryFrom};
+use std::convert::TryFrom;
 
 /// A abstract data type that tracks the current bindings of identifier names in a Leo program
 /// A symbol table has access to all function and circuit names in its parent's symbol table
@@ -38,7 +38,7 @@ pub struct SymbolTable {
     functions: HashMap<Identifier, FunctionType>,
 
     /// The parent of this symbol table
-    parent: Option<SymbolTable>,
+    parent: Option<Box<SymbolTable>>,
 
     /// The children of this symbol table
     children: Vec<SymbolTable>,
@@ -46,7 +46,7 @@ pub struct SymbolTable {
 
 impl SymbolTable {
     /// Creates a new symbol table with a given parent symbol table
-    pub fn new(parent: Option<SymbolTable>) -> Self {
+    pub fn new(parent: Option<Box<SymbolTable>>) -> Self {
         SymbolTable {
             variables: HashMap::new(),
             circuits: HashMap::new(),
@@ -78,12 +78,30 @@ impl SymbolTable {
 
     /// Get the current binding of a circuit type
     pub fn get_circuit(&self, key: &Identifier) -> Option<&CircuitType> {
-        self.circuits.get(key)
+        match self.circuits.get(key) {
+            Some(circuit) => Some(circuit),
+            None => {
+                // Look in parent symbol table
+                match &self.parent {
+                    Some(parent) => parent.get_circuit(key),
+                    None => None,
+                }
+            }
+        }
     }
 
     /// Get the current binding of a function type
     pub fn get_function(&self, key: &Identifier) -> Option<&FunctionType> {
-        self.functions.get(key)
+        match self.functions.get(key) {
+            Some(circuit) => Some(circuit),
+            None => {
+                // Look in parent symbol table
+                match &self.parent {
+                    Some(parent) => parent.get_function(key),
+                    None => None,
+                }
+            }
+        }
     }
 
     /// Adds a child symbol table

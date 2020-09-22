@@ -16,7 +16,9 @@
 use crate::{types::FunctionOutputType, Expression, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span, Statement as UnresolvedStatement};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Statement {
     Return(Expression, Span),
     // Definition(Declare, Variables, Vec<Expression>, Span),

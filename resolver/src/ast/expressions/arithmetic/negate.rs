@@ -14,14 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod arithmetic;
-pub use self::arithmetic::*;
+use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
+use leo_typed::{Expression as UnresolvedExpression, Span};
 
-pub mod expression;
-pub use self::expression::*;
+impl Expression {
+    /// Resolve the type of negating `-expression`
+    pub(crate) fn negate(
+        table: &mut SymbolTable,
+        expected_type: Option<Type>,
+        expression: UnresolvedExpression,
+        span: Span,
+    ) -> Result<Self, ()> {
+        let expression_resolved = Self::resolve(table, (expected_type, expression)).unwrap();
 
-pub mod identifiers;
-pub use self::identifiers::*;
-
-pub mod values;
-pub use self::values::*;
+        Ok(Expression {
+            type_: expression_resolved.type_.clone(),
+            value: ExpressionValue::Negate(Box::new(expression_resolved), span),
+        })
+    }
+}
