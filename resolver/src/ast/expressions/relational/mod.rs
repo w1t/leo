@@ -14,26 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod arithmetic;
-pub use self::arithmetic::*;
+pub mod eq;
+pub use self::eq::*;
 
-pub mod binary;
-pub use self::binary::*;
+pub mod ge;
+pub use self::ge::*;
 
-pub mod expression;
-pub use self::expression::*;
+pub mod gt;
+pub use self::gt::*;
 
-pub mod expression_value;
-pub use self::expression_value::*;
+pub mod le;
+pub use self::le::*;
 
-pub mod identifiers;
-pub use self::identifiers::*;
-
-pub mod logical;
-pub use self::logical::*;
-
-pub mod relational;
-pub use self::relational::*;
-
-pub mod values;
-pub use self::values::*;
+pub mod lt;
+pub use self::lt::*;

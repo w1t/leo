@@ -14,73 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{ResolvedNode, SymbolTable, Type};
-use leo_typed::{Expression as UnresolvedExpression, GroupValue, Identifier, IntegerType, Span};
+use crate::{ExpressionValue, ResolvedNode, SymbolTable, Type};
+use leo_typed::{Expression as UnresolvedExpression, Span};
 
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExpressionValue {
-    // Identifier
-    Identifier(Identifier),
-
-    // Values
-    Address(String, Span),
-    Boolean(String, Span),
-    Field(String, Span),
-    Group(GroupValue),
-    Integer(IntegerType, String, Span),
-
-    // Arithmetic operations
-    Add(Box<Expression>, Box<Expression>, Span),
-    Sub(Box<Expression>, Box<Expression>, Span),
-    Mul(Box<Expression>, Box<Expression>, Span),
-    Div(Box<Expression>, Box<Expression>, Span),
-    Pow(Box<Expression>, Box<Expression>, Span),
-    Negate(Box<Expression>, Span),
-
-    // Logical operations
-    And(Box<Expression>, Box<Expression>, Span),
-    Or(Box<Expression>, Box<Expression>, Span),
-    Not(Box<Expression>, Span),
-
-    // Relational operations
-    Eq(Box<Expression>, Box<Expression>, Span),
-    Ge(Box<Expression>, Box<Expression>, Span),
-    Gt(Box<Expression>, Box<Expression>, Span),
-    Le(Box<Expression>, Box<Expression>, Span),
-    Lt(Box<Expression>, Box<Expression>, Span),
-
-    // Conditionals
-    // (conditional, first_value, second_value, span)
-    IfElse(Box<Expression>, Box<Expression>, Box<Expression>, Span),
-
-    // Arrays
-    // (array_elements, span)
-    // Array(Vec<Box<SpreadOrExpression>>, Span),
-    // (array_name, range, span)
-    // ArrayAccess(Box<Expression>, Box<RangeOrExpression>, Span),
-
-    // Tuples
-    // (tuple_elements, span)
-    Tuple(Vec<Expression>, Span),
-    // (tuple_name, index, span)
-    TupleAccess(Box<Expression>, usize, Span),
-
-    // Circuits
-    // (defined_circuit_name, circuit_members, span)
-    // Circuit(Identifier, Vec<CircuitVariableDefinition>, Span),
-    // (declared_circuit name, circuit_member_name, span)
-    CircuitMemberAccess(Box<Expression>, Identifier, Span),
-    // (defined_circuit name, circuit_static_function_name, span)
-    CircuitStaticFunctionAccess(Box<Expression>, Identifier, Span),
-
-    // Functions
-    // (declared_function_name, function_arguments, span)
-    FunctionCall(Box<Expression>, Vec<Expression>, Span),
-    // (core_function_name, function_arguments, span)
-    CoreFunctionCall(String, Vec<Expression>, Span),
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Expression {
@@ -94,6 +31,16 @@ impl Expression {
     /// Return the type this expression evaluates to
     pub fn type_(&self) -> &Type {
         &self.type_
+    }
+
+    /// Return the span
+    pub fn span(&self) -> &Span {
+        self.value.span()
+    }
+
+    /// Returns `Ok` if this expression resolves to an integer type
+    pub fn check_type_integer(&self) -> Result<(), ()> {
+        Type::check_type_integer(&self.type_, self.value.span().clone())
     }
 }
 
@@ -132,6 +79,13 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::And(lhs, rhs, span) => Self::and(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Or(lhs, rhs, span) => Self::or(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Not(expression, span) => Self::not(table, expected_type, *expression, span),
+
+            // Relational Operations
+            UnresolvedExpression::Eq(lhs, rhs, span) => Self::eq(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Ge(lhs, rhs, span) => Self::ge(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Gt(lhs, rhs, span) => Self::gt(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Le(lhs, rhs, span) => Self::le(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Lt(lhs, rhs, span) => Self::lt(table, expected_type, *lhs, *rhs, span),
 
             // Relational Operators
             _ => return Err(()),

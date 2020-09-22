@@ -13,22 +13,30 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-
-use crate::{Expression, ExpressionValue, Type};
-use leo_typed::GroupValue;
+use crate::{Expression, ExpressionValue, SymbolTable, Type};
+use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Expression {
-    /// Resolve an group expression
-    pub(crate) fn group(expected_type: Option<Type>, group_value: GroupValue) -> Result<Self, ()> {
-        let type_ = Type::Group;
-        let span = group_value.span().clone();
+    /// Resolve the type of `lhs == rhs`
+    pub(crate) fn eq(
+        table: &mut SymbolTable,
+        expected_type: Option<Type>,
+        lhs: UnresolvedExpression,
+        rhs: UnresolvedExpression,
+        span: Span,
+    ) -> Result<Self, ()> {
+        // This expression results in a boolean type
+        let type_ = Type::Boolean;
 
         // Check the expected type if given
-        Type::check_type(&expected_type, &type_, span).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+
+        // Resolve lhs and rhs expressions
+        let (lhs_resolved, rhs_resolved) = Self::binary(table, None, lhs, rhs, span.clone()).unwrap();
 
         Ok(Expression {
             type_,
-            value: ExpressionValue::Group(group_value),
+            value: ExpressionValue::Eq(Box::new(lhs_resolved), Box::new(rhs_resolved), span),
         })
     }
 }

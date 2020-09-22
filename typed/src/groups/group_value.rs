@@ -43,10 +43,10 @@ impl GroupValue {
         }
     }
 
-    pub fn span(&self) -> Span {
+    pub fn span(&self) -> &Span {
         match self {
-            GroupValue::Single(_, span) => span.clone(),
-            GroupValue::Tuple(tuple) => tuple.span.clone(),
+            GroupValue::Single(_, span) => span,
+            GroupValue::Tuple(tuple) => &tuple.span,
         }
     }
 }

@@ -97,7 +97,7 @@ impl Type {
         }
     }
 
-    /// Returns true if the the expected type is not `None` && expected type == actual type
+    /// Returns `Ok` if the the expected type is `Some` && expected type == actual type
     pub fn check_type(expected_option: &Option<Self>, actual: &Type, _span: Span) -> Result<(), ()> {
         if let Some(expected) = expected_option {
             if expected.ne(&actual) {
@@ -106,5 +106,14 @@ impl Type {
             }
         }
         Ok(())
+    }
+
+    /// Returns `Ok` if the expected type is `Some(IntegerType)`
+    pub fn check_type_integer(expected: &Self, _span: Span) -> Result<(), ()> {
+        match expected {
+            Type::IntegerType(_) => Ok(()),
+            // TODO: throw mismatched type error
+            _ => unimplemented!("ERROR: mismatched types, expected integer"),
+        }
     }
 }
