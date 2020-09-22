@@ -38,6 +38,7 @@ pub enum Type {
 }
 
 impl Type {
+    /// Resolves the given type. Cannot be an implicit or Self type.
     pub fn from_unresolved(table: &SymbolTable, type_: UnresolvedType) -> Self {
         match type_ {
             UnresolvedType::Address => Type::Address,
@@ -62,33 +63,36 @@ impl Type {
             UnresolvedType::Circuit(identifier) => {
                 // Check that circuit exists
                 let exists = table.get_variable(&identifier.name);
+                // TODO: throw error for undefined circuit type
                 if exists.is_none() {
                     unimplemented!("ERROR: undefined circuit type error")
                 }
 
                 Type::Circuit(identifier)
             }
+            // TODO: throw error for invalid self type use
             UnresolvedType::SelfType => unimplemented!("ERROR: SelfType does not refer to a valid circuit definition"),
         }
     }
 
     /// Resolve a type inside of a circuit definition.
     /// If this type is SelfType, return the circuit's type
-    pub fn from_unresolved_circuit_type(table: &SymbolTable, circuit_name: Identifier, type_: UnresolvedType) -> Self {
+    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, type_: UnresolvedType) -> Self {
         match type_ {
             UnresolvedType::Array(type_, dimensions) => {
-                let array_type = Type::from_unresolved_circuit_type(table, circuit_name, *type_);
+                let array_type = Type::from_circuit(table, circuit_name, *type_);
                 Type::Array(Box::new(array_type), dimensions)
             }
             UnresolvedType::Tuple(types) => {
                 let tuple_types = types
                     .into_iter()
-                    .map(|type_| Type::from_unresolved_circuit_type(table, circuit_name.clone(), type_))
+                    .map(|type_| Type::from_circuit(table, circuit_name.clone(), type_))
                     .collect::<Vec<_>>();
 
                 Type::Tuple(tuple_types)
             }
             UnresolvedType::SelfType => Type::Circuit(circuit_name),
+            // The unresolved type does not depend on the current circuit definition
             unresolved => Type::from_unresolved(table, unresolved),
         }
     }

@@ -17,6 +17,7 @@
 use crate::{
     types::circuits::{CircuitFunctionType, CircuitVariableType},
     Attribute,
+    FunctionType,
     SymbolTable,
     Type,
 };
@@ -39,13 +40,13 @@ impl CircuitType {
     pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) {
         let circuit_identifier = unresolved_circuit.circuit_name;
         let mut variables = vec![];
-        let functions = vec![];
+        let mut functions = vec![];
 
         for member in unresolved_circuit.members {
             match member {
                 CircuitMember::CircuitVariable(mutable, identifier, type_) => {
                     // Resolve the type of the circuit member variable
-                    let type_ = Type::from_unresolved_circuit_type(table, circuit_identifier.clone(), type_);
+                    let type_ = Type::from_circuit(table, circuit_identifier.clone(), type_);
 
                     let attributes = if mutable { vec![Attribute::Mutable] } else { vec![] };
 
@@ -57,13 +58,16 @@ impl CircuitType {
 
                     variables.push(variable);
                 }
-                CircuitMember::CircuitFunction(_bool, _function) => {
-                    // let function = CircuitFunctionType {
-                    //     function: FunctionType {},
-                    //     attributes: vec![]
-                    // };
+                CircuitMember::CircuitFunction(is_static, function) => {
+                    let function_type = FunctionType::from_circuit(table, circuit_identifier.clone(), function);
+                    let attributes = if is_static { vec![Attribute::Static] } else { vec![] };
 
-                    // functions.push(function);
+                    let function = CircuitFunctionType {
+                        function: function_type,
+                        attributes,
+                    };
+
+                    functions.push(function);
                 }
             }
         }

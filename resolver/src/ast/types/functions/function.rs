@@ -53,4 +53,23 @@ impl FunctionType {
 
         table.insert_function(function_identifier, function);
     }
+
+    /// Resolve a circuit function definition and return it {
+    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, unresolved_function: Function) -> Self {
+        let function_identifier = unresolved_function.identifier;
+        let mut inputs = vec![];
+
+        for unresolved_input in unresolved_function.input {
+            let input = FunctionInputType::from_circuit(table, circuit_name.clone(), unresolved_input);
+            inputs.push(input);
+        }
+
+        let output = FunctionOutputType::from_circuit(table, circuit_name.clone(), unresolved_function.returns);
+
+        FunctionType {
+            identifier: function_identifier.clone(),
+            inputs,
+            output,
+        }
+    }
 }

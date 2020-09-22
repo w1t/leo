@@ -46,6 +46,27 @@ impl FunctionInputVariableType {
             attributes,
         }
     }
+
+    /// Return a resolved function input variable from inside of a circuit
+    pub fn from_circuit(
+        table: &SymbolTable,
+        circuit_name: Identifier,
+        unresolved_function_input: FunctionInputVariable,
+    ) -> Self {
+        let identifier = unresolved_function_input.identifier;
+        let type_ = Type::from_circuit(table, circuit_name, unresolved_function_input.type_);
+        let attributes = if unresolved_function_input.mutable {
+            vec![Attribute::Mutable]
+        } else {
+            vec![]
+        };
+
+        FunctionInputVariableType {
+            identifier,
+            type_,
+            attributes,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -61,6 +82,19 @@ impl FunctionInputType {
             FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
             FunctionInput::Variable(unresolved_function_input) => {
                 let function_input = FunctionInputVariableType::from_unresolved(table, unresolved_function_input);
+
+                FunctionInputType::Variable(function_input)
+            }
+        }
+    }
+
+    /// Return a resolved function input from inside of a circuit
+    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, unresolved_input: FunctionInput) -> Self {
+        match unresolved_input {
+            FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
+            FunctionInput::Variable(unresolved_function_input) => {
+                let function_input =
+                    FunctionInputVariableType::from_circuit(table, circuit_name, unresolved_function_input);
 
                 FunctionInputType::Variable(function_input)
             }

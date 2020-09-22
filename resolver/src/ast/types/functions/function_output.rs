@@ -16,7 +16,7 @@
 
 use crate::{SymbolTable, Type};
 
-use leo_typed::Type as UnresolvedType;
+use leo_typed::{Identifier, Type as UnresolvedType};
 
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +32,16 @@ impl FunctionOutputType {
         let output_type = match unresolved {
             None => Type::Tuple(vec![]), // functions with no return value return an empty tuple,
             Some(type_) => Type::from_unresolved(table, type_),
+        };
+
+        FunctionOutputType { type_: output_type }
+    }
+
+    /// Return a resolved function output type from inside of a circuit
+    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, unresolved: Option<UnresolvedType>) -> Self {
+        let output_type = match unresolved {
+            None => Type::Tuple(vec![]),
+            Some(type_) => Type::from_circuit(table, circuit_name, type_),
         };
 
         FunctionOutputType { type_: output_type }
