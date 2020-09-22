@@ -23,7 +23,6 @@ use crate::{
 use leo_typed::{Circuit, CircuitMember, Identifier};
 
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitType {
@@ -37,10 +36,10 @@ pub struct CircuitType {
 
 impl CircuitType {
     /// Resolve a circuit definition and insert it into the given symbol table.
-    pub fn insert_definition(mut table: &mut SymbolTable, unresolved_circuit: Circuit) {
+    pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) {
         let circuit_identifier = unresolved_circuit.circuit_name;
         let mut variables = vec![];
-        let mut functions = vec![];
+        let functions = vec![];
 
         for member in unresolved_circuit.members {
             match member {
@@ -58,7 +57,7 @@ impl CircuitType {
 
                     variables.push(variable);
                 }
-                CircuitMember::CircuitFunction(bool, function) => {
+                CircuitMember::CircuitFunction(_bool, _function) => {
                     // let function = CircuitFunctionType {
                     //     function: FunctionType {},
                     //     attributes: vec![]
@@ -78,28 +77,3 @@ impl CircuitType {
         table.insert_circuit(circuit_identifier, circuit);
     }
 }
-
-// impl TryFrom<Circuit> for CircuitType {
-//     type Error = ();
-//
-//     fn try_from(value: Circuit) -> Result<Self, Self::Error> {
-//         let identifier = value.circuit_name;
-//         let mut variables = vec![];
-//         let mut functions = vec![];
-//
-//         for member in value.members {
-//             match member {
-//                 CircuitMember::CircuitVariable(bool, id, type_) => {
-//                     let variable = CircuitVariableType::from_unresolved()
-//                 }
-//                 CircuitMember::CircuitFunction(bool, function) => {}
-//             }
-//         }
-//
-//         Ok(CircuitType {
-//             identifier,
-//             variables,
-//             functions,
-//         })
-//     }
-// }

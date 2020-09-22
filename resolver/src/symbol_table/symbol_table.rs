@@ -15,7 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{CircuitType, Entry, FunctionType};
-use leo_typed::{Identifier, Program, Type};
+use leo_typed::{Identifier, Program};
 
 use leo_imports::ImportParser;
 use std::collections::HashMap;
@@ -33,8 +33,9 @@ pub struct SymbolTable {
     /// Maps circuit name -> (location, inputs, outputs)
     circuits: HashMap<Identifier, CircuitType>,
 
-    // ///Maps function name -> (location, variables, functions)
-    // functions: HashMap<Identifier, FunctionType>,
+    ///Maps function name -> (location, variables, functions)
+    functions: HashMap<Identifier, FunctionType>,
+
     /// The parent of this symbol table
     parent: Option<Box<SymbolTable>>,
 
@@ -48,6 +49,7 @@ impl SymbolTable {
         SymbolTable {
             variables: HashMap::new(),
             circuits: HashMap::new(),
+            functions: HashMap::new(),
             parent,
             children: vec![],
         }
@@ -66,6 +68,11 @@ impl SymbolTable {
     /// Insert a circuit definition into the symbol table
     pub fn insert_circuit(&mut self, key: Identifier, value: CircuitType) -> Option<CircuitType> {
         self.circuits.insert(key, value)
+    }
+
+    /// Insert a function definition into the symbol table
+    pub fn insert_function(&mut self, key: Identifier, value: FunctionType) -> Option<FunctionType> {
+        self.functions.insert(key, value)
     }
 
     /// Adds a pointer to a child symbol table
@@ -104,9 +111,14 @@ impl SymbolTable {
     /// Type resolution for circuit and function signatures completed during this step
     pub fn insert_definitions(&mut self, program: &Program) {
         // insert program circuit types
-        program.circuits.iter().for_each(|(identifier, unresolved_circuit)| {
+        program.circuits.iter().for_each(|(_identifier, unresolved_circuit)| {
             CircuitType::insert_definition(self, unresolved_circuit.clone());
-        })
+        });
+
+        // insert program function types
+        program.functions.iter().for_each(|(_identifier, unresolved_function)| {
+            FunctionType::insert_definition(self, unresolved_function.clone())
+        });
     }
 
     /// Inserts all function and circuit identifiers for a given program

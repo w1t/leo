@@ -14,15 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::Type;
-use leo_typed::Identifier;
+use crate::{SymbolTable, Type};
+
+use leo_typed::Type as UnresolvedType;
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FunctionOutputType {
-    /// Name of function output
-    pub identifier: Identifier,
     /// Type of function output
     pub type_: Type,
+}
+
+impl FunctionOutputType {
+    /// Return a resolved function output type given an unresolved function output
+    pub fn from_unresolved(table: &SymbolTable, unresolved: Option<UnresolvedType>) -> Self {
+        let output_type = match unresolved {
+            None => Type::Tuple(vec![]), // functions with no return value return an empty tuple,
+            Some(type_) => Type::from_unresolved(table, type_),
+        };
+
+        FunctionOutputType { type_: output_type }
+    }
 }

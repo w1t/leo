@@ -14,15 +14,56 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::Type;
-use leo_typed::Identifier;
+use crate::{Attribute, SymbolTable, Type};
+use leo_typed::{FunctionInput, FunctionInputVariable, Identifier};
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct FunctionInputType {
+pub struct FunctionInputVariableType {
     /// Name of function input
     pub identifier: Identifier,
     /// Type of function input
     pub type_: Type,
+    /// The attributes of the function variable
+    pub attributes: Vec<Attribute>,
+}
+
+impl FunctionInputVariableType {
+    /// Return a resolved function input variable type given an unresolved function input variable
+    pub fn from_unresolved(table: &SymbolTable, unresolved_function_input: FunctionInputVariable) -> Self {
+        let identifier = unresolved_function_input.identifier;
+        let type_ = Type::from_unresolved(table, unresolved_function_input.type_);
+        let attributes = if unresolved_function_input.mutable {
+            vec![Attribute::Mutable]
+        } else {
+            vec![]
+        };
+
+        FunctionInputVariableType {
+            identifier,
+            type_,
+            attributes,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum FunctionInputType {
+    InputKeyword(Identifier),
+    Variable(FunctionInputVariableType),
+}
+
+impl FunctionInputType {
+    /// Return a resolved function input given an unresolved function input
+    pub fn from_unresolved(table: &SymbolTable, unresolved_input_variable: FunctionInput) -> Self {
+        match unresolved_input_variable {
+            FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
+            FunctionInput::Variable(unresolved_function_input) => {
+                let function_input = FunctionInputVariableType::from_unresolved(table, unresolved_function_input);
+
+                FunctionInputType::Variable(function_input)
+            }
+        }
+    }
 }

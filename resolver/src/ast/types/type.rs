@@ -13,11 +13,10 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
+use crate::SymbolTable;
+
 use leo_typed::{Identifier, IntegerType, Type as UnresolvedType};
 use serde::{Deserialize, Serialize};
-
-use crate::SymbolTable;
-use std::convert::TryFrom;
 
 /// The type of an identifier in a Leo program. Cannot be implicit.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -39,13 +38,7 @@ pub enum Type {
 }
 
 impl Type {
-    /// Resolve a type inside of a circuit definition.
-    /// If this type is SelfType, return the circuit's type
-    pub fn from_unresolved_circuit_type(
-        mut table: &mut SymbolTable,
-        circuit_name: Identifier,
-        type_: UnresolvedType,
-    ) -> Self {
+    pub fn from_unresolved(table: &SymbolTable, type_: UnresolvedType) -> Self {
         match type_ {
             UnresolvedType::Address => Type::Address,
             UnresolvedType::Boolean => Type::Boolean,
@@ -54,13 +47,13 @@ impl Type {
             UnresolvedType::IntegerType(integer) => Type::IntegerType(integer),
 
             UnresolvedType::Array(type_, dimensions) => {
-                let array_type = Type::from_unresolved_circuit_type(table, circuit_name, *type_);
+                let array_type = Type::from_unresolved(table, *type_);
                 Type::Array(Box::new(array_type), dimensions)
             }
             UnresolvedType::Tuple(types) => {
                 let tuple_types = types
                     .into_iter()
-                    .map(|type_| Type::from_unresolved_circuit_type(table, circuit_name.clone(), type_))
+                    .map(|type_| Type::from_unresolved(table, type_))
                     .collect::<Vec<_>>();
 
                 Type::Tuple(tuple_types)
@@ -75,7 +68,28 @@ impl Type {
 
                 Type::Circuit(identifier)
             }
+            UnresolvedType::SelfType => unimplemented!("ERROR: SelfType does not refer to a valid circuit definition"),
+        }
+    }
+
+    /// Resolve a type inside of a circuit definition.
+    /// If this type is SelfType, return the circuit's type
+    pub fn from_unresolved_circuit_type(table: &SymbolTable, circuit_name: Identifier, type_: UnresolvedType) -> Self {
+        match type_ {
+            UnresolvedType::Array(type_, dimensions) => {
+                let array_type = Type::from_unresolved_circuit_type(table, circuit_name, *type_);
+                Type::Array(Box::new(array_type), dimensions)
+            }
+            UnresolvedType::Tuple(types) => {
+                let tuple_types = types
+                    .into_iter()
+                    .map(|type_| Type::from_unresolved_circuit_type(table, circuit_name.clone(), type_))
+                    .collect::<Vec<_>>();
+
+                Type::Tuple(tuple_types)
+            }
             UnresolvedType::SelfType => Type::Circuit(circuit_name),
+            unresolved => Type::from_unresolved(table, unresolved),
         }
     }
 }

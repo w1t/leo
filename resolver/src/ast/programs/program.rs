@@ -15,8 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{ResolvedNode, SymbolTable};
-use leo_typed::{programs::Program as TypedProgram, Identifier};
-use std::collections::HashMap;
+use leo_typed::programs::Program as TypedProgram;
 
 pub static MAIN_FUNCTION_NAME: &str = "main";
 
@@ -33,7 +32,7 @@ impl ResolvedNode for Program {
     type UnresolvedNode = TypedProgram;
 
     /// Returns a resolved program AST given an unresolved program AST
-    fn resolve(mut table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+    fn resolve(_table: &mut SymbolTable, _unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         // let mut circuits = HashMap::new();
 
         // Resolve import statements

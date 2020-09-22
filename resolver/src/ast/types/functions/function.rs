@@ -14,8 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::types::functions::{FunctionInputType, FunctionOutputType};
-use leo_typed::Identifier;
+use crate::{
+    types::functions::{FunctionInputType, FunctionOutputType},
+    SymbolTable,
+};
+use leo_typed::{Function, Identifier};
 
 use serde::{Deserialize, Serialize};
 
@@ -25,6 +28,29 @@ pub struct FunctionType {
     pub identifier: Identifier,
     /// The function inputs
     pub inputs: Vec<FunctionInputType>,
-    /// The function outputs
-    pub outputs: Vec<FunctionOutputType>,
+    /// The function return output
+    pub output: FunctionOutputType,
+}
+
+impl FunctionType {
+    /// Resolve a function definition and insert it into the given symbol table
+    pub fn insert_definition(table: &mut SymbolTable, unresolved_function: Function) {
+        let function_identifier = unresolved_function.identifier;
+        let mut inputs = vec![];
+
+        for unresolved_input in unresolved_function.input {
+            let input = FunctionInputType::from_unresolved(table, unresolved_input);
+            inputs.push(input);
+        }
+
+        let output = FunctionOutputType::from_unresolved(table, unresolved_function.returns);
+
+        let function = FunctionType {
+            identifier: function_identifier.clone(),
+            inputs,
+            output,
+        };
+
+        table.insert_function(function_identifier, function);
+    }
 }

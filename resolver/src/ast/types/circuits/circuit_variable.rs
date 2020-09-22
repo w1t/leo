@@ -15,7 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{Attribute, Type};
-use leo_typed::{Identifier, Type as UnresolvedType};
+use leo_typed::Identifier;
 
 use serde::{Deserialize, Serialize};
 
@@ -28,14 +28,3 @@ pub struct CircuitVariableType {
     /// The attributes of the circuit member variable
     pub attributes: Vec<Attribute>,
 }
-
-// impl CircuitVariableType {
-//     pub fn from_unresolved(
-//         circuit_name: Identifier,
-//         mutable: bool,
-//         identifier: Identifier,
-//         unresolved_type: UnresolvedType,
-//     ) -> Self {
-//         let resolved_type = Type::from_unresolved_circuit_type(circuit_name, unresolved_type).unwrap();
-//     }
-// }

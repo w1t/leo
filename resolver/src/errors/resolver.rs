@@ -15,7 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use leo_imports::ImportParserError;
-use leo_typed::{Error as FormattedError, Span};
+use leo_typed::Error as FormattedError;
 
 #[derive(Debug, Error)]
 pub enum ResolverError {
