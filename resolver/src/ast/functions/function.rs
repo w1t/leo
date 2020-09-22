@@ -14,17 +14,52 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::functions::{FunctionInput, FunctionOutput};
-use leo_typed::Identifier;
+use crate::{FunctionInputType, FunctionType, ResolvedNode, Statement, SymbolTable};
+use leo_typed::{Function as UnresolvedFunction, Identifier};
 
 use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct FunctionType {
+pub struct Function {
     /// The name of the function definition
-    pub identifier: Identifier,
-    /// The function inputs
-    pub inputs: Vec<FunctionInput>,
-    /// The function outputs
-    pub outputs: Vec<FunctionOutput>,
+    pub type_: FunctionType,
+    /// The function statements
+    pub statements: Vec<Statement>,
+}
+
+impl ResolvedNode for Function {
+    type Error = ();
+    type UnresolvedNode = UnresolvedFunction;
+
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        let identifier = unresolved.identifier;
+        // TODO: Throw an unknown function error
+        let type_ = table.get_function(&identifier).unwrap();
+
+        // Create function context
+        let mut child_table = SymbolTable::new(Some(table.clone()));
+
+        // Insert function inputs into symbol table
+        for input in type_.inputs.clone() {
+            // TODO: throw duplicate function input error
+            input.insert(&mut child_table).is_some();
+        }
+
+        // Pass expected function output to resolved statements
+        let output = type_.output.clone();
+        let mut statements = vec![];
+
+        // Resolve all function statements
+        for (_i, unresolved_statement) in unresolved.statements.into_iter().enumerate() {
+            let statement = Statement::resolve(table, (output.clone(), unresolved_statement)).unwrap();
+
+            statements.push(statement);
+        }
+
+        Ok(Function {
+            type_: type_.clone(),
+            statements,
+        })
+    }
 }

@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Attribute, SymbolTable, Type};
+use crate::{Attribute, Entry, SymbolTable, Type};
 use leo_typed::{FunctionInput, FunctionInputVariable, Identifier};
 
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FunctionInputVariableType {
@@ -67,6 +68,14 @@ impl FunctionInputVariableType {
             attributes,
         }
     }
+
+    /// Insert this function variable into the given symbol table
+    pub fn insert(&self, table: &mut SymbolTable) -> Option<Entry> {
+        let key = self.identifier.name.clone();
+        let value = Entry::try_from(self.clone()).unwrap();
+
+        table.insert_variable(key, value)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -97,6 +106,16 @@ impl FunctionInputType {
                     FunctionInputVariableType::from_circuit(table, circuit_name, unresolved_function_input);
 
                 FunctionInputType::Variable(function_input)
+            }
+        }
+    }
+
+    /// Insert this function input into the given symbol table
+    pub fn insert(&self, table: &mut SymbolTable) -> Option<Entry> {
+        match self {
+            FunctionInputType::Variable(variable) => variable.insert(table),
+            FunctionInputType::InputKeyword(identifier) => {
+                unimplemented!("uncomment when support for input types is added")
             }
         }
     }

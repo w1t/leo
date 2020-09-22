@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-// pub mod function;
-// pub use self::function::*;
-//
+pub mod function;
+pub use self::function::*;
+
 // pub mod function_input;
 // pub use self::function_input::*;
 //

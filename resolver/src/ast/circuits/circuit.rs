@@ -15,8 +15,10 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{
-    circuits::{CircuitFunctionType, CircuitVariableType},
-    ResolvedNode, SymbolTable,
+    circuits::{CircuitFunction, CircuitVariable},
+    CircuitType,
+    ResolvedNode,
+    SymbolTable,
 };
 use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier};
 
@@ -27,11 +29,9 @@ use std::fmt;
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Circuit {
     /// The name of the circuit definition
-    pub identifier: Identifier,
-    /// The circuit member variables
-    pub variables: Vec<CircuitVariableType>,
+    pub type_: CircuitType,
     /// The circuit member functions
-    pub functions: Vec<CircuitFunctionType>,
+    pub functions: Hashmap<Identifier, Function>,
 }
 
 impl ResolvedNode for Circuit {

@@ -24,41 +24,43 @@ use crate::{
 use leo_typed::{Circuit, CircuitMember, Identifier};
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitType {
     /// The name of the circuit definition
     pub identifier: Identifier,
     /// The circuit member variables
-    pub variables: Vec<CircuitVariableType>,
+    pub variables: HashMap<Identifier, CircuitVariableType>,
     /// The circuit member functions
-    pub functions: Vec<CircuitFunctionType>,
+    pub functions: HashMap<Identifier, CircuitFunctionType>,
 }
 
 impl CircuitType {
     /// Resolve a circuit definition and insert it into the given symbol table.
     pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) {
         let circuit_identifier = unresolved_circuit.circuit_name;
-        let mut variables = vec![];
-        let mut functions = vec![];
+        let mut variables = HashMap::new();
+        let mut functions = HashMap::new();
 
         for member in unresolved_circuit.members {
             match member {
-                CircuitMember::CircuitVariable(mutable, identifier, type_) => {
+                CircuitMember::CircuitVariable(mutable, variable_identifier, type_) => {
                     // Resolve the type of the circuit member variable
                     let type_ = Type::from_circuit(table, circuit_identifier.clone(), type_);
 
                     let attributes = if mutable { vec![Attribute::Mutable] } else { vec![] };
 
                     let variable = CircuitVariableType {
-                        identifier,
+                        identifier: variable_identifier.clone(),
                         type_,
                         attributes,
                     };
 
-                    variables.push(variable);
+                    variables.insert(variable_identifier, variable);
                 }
                 CircuitMember::CircuitFunction(is_static, function) => {
+                    let function_identifier = function.identifier.clone();
                     let function_type = FunctionType::from_circuit(table, circuit_identifier.clone(), function);
                     let attributes = if is_static { vec![Attribute::Static] } else { vec![] };
 
@@ -67,7 +69,7 @@ impl CircuitType {
                         attributes,
                     };
 
-                    functions.push(function);
+                    functions.insert(function_identifier, function);
                 }
             }
         }

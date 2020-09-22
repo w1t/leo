@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{ResolvedNode, SymbolTable};
-use leo_typed::programs::Program as TypedProgram;
+use crate::{Function, ResolvedNode, SymbolTable};
+use leo_typed::{programs::Program as TypedProgram, Identifier};
+use std::collections::HashMap;
 
 pub static MAIN_FUNCTION_NAME: &str = "main";
 
@@ -23,8 +24,8 @@ pub static MAIN_FUNCTION_NAME: &str = "main";
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Program {
     // pub imports: Vec<Import>,
-// pub circuits: HashMap<Identifier, Circuit>,
-// pub function: HashMap<Identifier, Function>,
+    // pub circuits: HashMap<Identifier, Circuit>,
+    pub functions: HashMap<Identifier, Function>,
 }
 
 impl ResolvedNode for Program {
@@ -32,8 +33,9 @@ impl ResolvedNode for Program {
     type UnresolvedNode = TypedProgram;
 
     /// Returns a resolved program AST given an unresolved program AST
-    fn resolve(_table: &mut SymbolTable, _unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         // let mut circuits = HashMap::new();
+        let mut functions = HashMap::new();
 
         // Resolve import statements
 
@@ -44,7 +46,12 @@ impl ResolvedNode for Program {
         //     circuits.insert(identifier, resolved_circuit);
         // });
 
-        // Resolve function definitions
+        // Resolve function statements
+        unresolved.functions.into_iter().for_each(|(identifier, function)| {
+            let resolved_function = Function::resolve().unwrap();
+
+            functions.insert(identifier, resolved_function);
+        });
 
         // Resolve tests
 
@@ -59,6 +66,6 @@ impl ResolvedNode for Program {
         //     None => unimplemented!("ERROR: main function not found"),
         // }
 
-        Ok(Program {})
+        Ok(Program { functions })
     }
 }

@@ -16,6 +16,7 @@
 use crate::ast::{Attribute, Type};
 use leo_typed::{Circuit, Function, Identifier};
 
+use crate::FunctionInputVariableType;
 use std::{convert::TryFrom, fmt};
 
 /// A symbol table entry stores the type and attribute information for an identifier
@@ -24,6 +25,13 @@ pub struct Entry {
     identifier: Identifier,
     type_: Type,
     attributes: Vec<Attribute>,
+}
+
+impl Entry {
+    /// Returns the type of the variable
+    pub fn type_(&self) -> &Type {
+        &self.type_
+    }
 }
 
 impl TryFrom<Circuit> for Entry {
@@ -49,6 +57,22 @@ impl TryFrom<Function> for Entry {
         let identifier = value.identifier;
         let type_ = Type::Function(identifier.clone());
         let attributes = vec![];
+
+        Ok(Entry {
+            identifier,
+            type_,
+            attributes,
+        })
+    }
+}
+
+impl TryFrom<FunctionInputVariableType> for Entry {
+    type Error = ();
+
+    fn try_from(value: FunctionInputVariableType) -> Result<Self, Self::Error> {
+        let identifier = value.identifier;
+        let type_ = value.type_;
+        let attributes = value.attributes;
 
         Ok(Entry {
             identifier,

@@ -19,9 +19,9 @@ use crate::{function::FunctionType, Attribute};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct CircuitFunctionType {
+pub struct CircuitFunction {
     /// The function signature of the circuit member function
-    pub function: FunctionType,
+    pub function: Function,
     /// The attributes of the circuit member function
     pub attributes: Vec<Attribute>,
 }

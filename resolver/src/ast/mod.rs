@@ -22,6 +22,9 @@ pub use self::circuits::*;
 pub mod console;
 pub use self::console::*;
 
+pub mod expressions;
+pub use self::expressions::*;
+
 pub mod functions;
 pub use self::functions::*;
 

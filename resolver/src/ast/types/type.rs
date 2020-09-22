@@ -15,7 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 use crate::SymbolTable;
 
-use leo_typed::{Identifier, IntegerType, Type as UnresolvedType};
+use leo_typed::{Identifier, IntegerType, Span, Type as UnresolvedType};
 use serde::{Deserialize, Serialize};
 
 /// The type of an identifier in a Leo program. Cannot be implicit.
@@ -95,5 +95,17 @@ impl Type {
             // The unresolved type does not depend on the current circuit definition
             unresolved => Type::from_unresolved(table, unresolved),
         }
+    }
+}
+
+impl Option<Type> {
+    pub fn check_type(&self, actual: &Type, span: Span) -> Result<(), ()> {
+        if let Some(expected) = self {
+            if expected.ne(&actual) {
+                // TODO: throw mismatched type error
+                unimplemented!("ERROR: mismatched types")
+            }
+        }
+        Ok(())
     }
 }

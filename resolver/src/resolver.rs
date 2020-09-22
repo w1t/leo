@@ -36,8 +36,11 @@ impl LeoResolvedAst {
         // Create a symbol table for main.leo
         let mut symbol_table = SymbolTable::new(None);
 
-        // Pass 1: Insert all in-scope identifiers into the symbol table
-        symbol_table.insert_program(&program);
+        // Pass 1: Insert circuits and functions as variable types
+        symbol_table.insert_program_variables(&program);
+
+        // Pass 2: Insert circuits and functions as definitions
+        symbol_table.insert_definitions(&program);
 
         // Pass 2: Perform semantic analysis on program
         // At each AST node:
