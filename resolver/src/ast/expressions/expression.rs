@@ -31,7 +31,7 @@ pub enum ExpressionValue {
     Group(GroupValue),
     Integer(IntegerType, String, Span),
 
-    // Number operations
+    // Arithmetic operations
     Add(Box<Expression>, Box<Expression>, Span),
     Sub(Box<Expression>, Box<Expression>, Span),
     Mul(Box<Expression>, Box<Expression>, Span),
@@ -39,10 +39,12 @@ pub enum ExpressionValue {
     Pow(Box<Expression>, Box<Expression>, Span),
     Negate(Box<Expression>, Span),
 
-    // Boolean operations
-    Not(Box<Expression>, Span),
-    Or(Box<Expression>, Box<Expression>, Span),
+    // Logical operations
     And(Box<Expression>, Box<Expression>, Span),
+    Or(Box<Expression>, Box<Expression>, Span),
+    Not(Box<Expression>, Span),
+
+    // Relational operations
     Eq(Box<Expression>, Box<Expression>, Span),
     Ge(Box<Expression>, Box<Expression>, Span),
     Gt(Box<Expression>, Box<Expression>, Span),
@@ -93,27 +95,6 @@ impl Expression {
     pub fn type_(&self) -> &Type {
         &self.type_
     }
-
-    /// Resolve a binary expression from left to right.
-    /// If no expected type is given, then the expression resolves to the lhs type.
-    pub(crate) fn binary(
-        table: &mut SymbolTable,
-        mut expected_type: Option<Type>,
-        lhs: UnresolvedExpression,
-        rhs: UnresolvedExpression,
-        _span: Span,
-    ) -> Result<(Self, Self), ()> {
-        // Resolve lhs with expected type
-        let lhs_resolved = Expression::resolve(table, (expected_type, lhs)).unwrap();
-
-        // Set the expected type to the lhs type
-        expected_type = Some(lhs_resolved.type_.clone());
-
-        // Resolve the rhs with expected type
-        let rhs_resolved = Expression::resolve(table, (expected_type, rhs)).unwrap();
-
-        Ok((lhs_resolved, rhs_resolved))
-    }
 }
 
 impl ResolvedNode for Expression {
@@ -139,7 +120,7 @@ impl ResolvedNode for Expression {
                 Self::integer(expected_type, integer_type, string, span)
             }
 
-            // Number Operations
+            // Arithmetic Operations
             UnresolvedExpression::Add(lhs, rhs, span) => Self::add(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Sub(lhs, rhs, span) => Self::sub(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Mul(lhs, rhs, span) => Self::mul(table, expected_type, *lhs, *rhs, span),
@@ -147,6 +128,12 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::Pow(lhs, rhs, span) => Self::pow(table, expected_type, *lhs, *rhs, span),
             UnresolvedExpression::Negate(expression, span) => Self::negate(table, expected_type, *expression, span),
 
+            // Logical Operations
+            UnresolvedExpression::And(lhs, rhs, span) => Self::and(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Or(lhs, rhs, span) => Self::or(table, expected_type, *lhs, *rhs, span),
+            UnresolvedExpression::Not(expression, span) => Self::not(table, expected_type, *expression, span),
+
+            // Relational Operators
             _ => return Err(()),
         }
     }
