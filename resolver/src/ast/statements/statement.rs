@@ -13,8 +13,8 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{types::FunctionOutputType, Definition, Expression, ResolvedNode, SymbolTable, Type};
-use leo_typed::{Expression as UnresolvedExpression, Span, Statement as UnresolvedStatement};
+use crate::{types::FunctionOutputType, Definition, Expression, ResolvedNode, SymbolTable};
+use leo_typed::{Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +39,10 @@ impl ResolvedNode for Statement {
 
         match statement {
             UnresolvedStatement::Return(expression, span) => Self::resolve_return(table, return_type, expression, span),
+            UnresolvedStatement::Definition(declare, variables, expressions, span) => {
+                Self::definition(table, declare, variables, expressions, span)
+            }
+
             _ => Err(()),
         }
     }

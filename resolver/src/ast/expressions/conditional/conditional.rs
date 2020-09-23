@@ -17,8 +17,6 @@
 use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
-use serde::{Deserialize, Serialize};
-
 impl Expression {
     /// Resolves an `if {cond} ? {first} : {second}` expression
     /// `{cond}` should resolve to a boolean type

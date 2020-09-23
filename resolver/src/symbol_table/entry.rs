@@ -22,9 +22,9 @@ use std::{convert::TryFrom, fmt};
 /// A symbol table entry stores the type and attribute information for an identifier
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Entry {
-    identifier: Identifier,
-    type_: Type,
-    attributes: Vec<Attribute>,
+    pub identifier: Identifier,
+    pub type_: Type,
+    pub attributes: Vec<Attribute>,
 }
 
 impl Entry {

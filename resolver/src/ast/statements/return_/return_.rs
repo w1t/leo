@@ -17,8 +17,6 @@
 use crate::{Expression, ResolvedNode, Statement, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
-use serde::{Deserialize, Serialize};
-
 impl Statement {
     /// Resolve return statement to function output type
     pub(crate) fn resolve_return(
