@@ -18,6 +18,8 @@ use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Expression {
+    /// Resolves an inline function call
+    /// Checks for errors in function name, inputs, and output.
     pub(crate) fn function_call(
         table: &mut SymbolTable,
         expected_type: Option<Type>,
@@ -35,7 +37,7 @@ impl Expression {
         let type_ = function_type.output.type_.clone();
         let expected_inputs = function_type.inputs.clone();
 
-        // Check the number of arguments given
+        // Check the number of inputs given
         if inputs.len() != expected_inputs.len() {
             unimplemented!("ERROR: function input lengths not equal")
         }

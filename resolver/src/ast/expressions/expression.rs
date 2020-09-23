@@ -119,7 +119,9 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::FunctionCall(function, inputs, span) => {
                 Self::function_call(table, expected_type, function, inputs, span)
             }
-
+            // UnresolvedExpression::CoreFunctionCall(name, inputs, output, span) => {
+            //     Self::core_function_call(table, expected_type, function, inputs, span)
+            // }
             _ => return Err(()),
         }
     }

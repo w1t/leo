@@ -22,6 +22,7 @@ use crate::{
     RangeOrExpression,
     Span,
     SpreadOrExpression,
+    Type,
 };
 use leo_ast::{
     access::{Access, AssigneeAccess},
@@ -113,8 +114,8 @@ pub enum Expression {
     // Functions
     // (declared_function_name, function_arguments, span)
     FunctionCall(Box<Expression>, Vec<Expression>, Span),
-    // (core_function_name, function_arguments, span)
-    CoreFunctionCall(String, Vec<Expression>, Span),
+    // (core_function_name, function_arguments, function_output_type, span)
+    CoreFunctionCall(String, Vec<Expression>, Type, Span),
 }
 
 impl Expression {
@@ -150,7 +151,7 @@ impl Expression {
             Expression::CircuitStaticFunctionAccess(_, _, old_span) => *old_span = new_span.clone(),
 
             Expression::FunctionCall(_, _, old_span) => *old_span = new_span.clone(),
-            Expression::CoreFunctionCall(_, _, old_span) => *old_span = new_span.clone(),
+            Expression::CoreFunctionCall(_, _, _, old_span) => *old_span = new_span.clone(),
             _ => {}
         }
     }
@@ -281,7 +282,7 @@ impl<'ast> fmt::Display for Expression {
                 }
                 write!(f, ")")
             }
-            Expression::CoreFunctionCall(ref function, ref arguments, ref _span) => {
+            Expression::CoreFunctionCall(ref function, ref arguments, _, ref _span) => {
                 write!(f, "{}(", function,)?;
                 for (i, param) in arguments.iter().enumerate() {
                     write!(f, "{}", param)?;

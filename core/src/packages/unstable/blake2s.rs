@@ -100,6 +100,7 @@ impl CoreCircuit for Blake2sCircuit {
                                     span: span.clone(),
                                 }),
                             ],
+                            Type::Array(Box::new(Type::IntegerType(IntegerType::U8)), vec![32usize]),
                             span.clone(),
                         ),
                         span.clone(),

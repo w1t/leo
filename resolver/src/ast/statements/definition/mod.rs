@@ -14,19 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-// use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
-// use leo_typed::{Expression as UnresolvedExpression, Span, Type as UnresolvedType};
-//
-// impl Expression {
-//     /// Resolves inputs for a call to a core circuit.
-//     pub(crate) fn core_circuit_call(
-//         table: &mut SymbolTable,
-//         expected_type: Option<Type>,
-//         function: String,
-//         inputs: Vec<Expression>,
-//         output_type: UnresolvedType,
-//         span: Span,
-//     ) -> Result<Self, ()> {
-//
-//     }
-// }
+pub mod definition;
+pub use self::definition::*;
