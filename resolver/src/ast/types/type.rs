@@ -108,7 +108,7 @@ impl Type {
         Ok(())
     }
 
-    /// Returns `Ok` given an expected integer type `Type::IntegerType`
+    /// Returns `Ok` if self is an expected integer type `Type::IntegerType`
     pub fn check_type_integer(&self, _span: Span) -> Result<(), ()> {
         match self {
             Type::IntegerType(_) => Ok(()),
@@ -117,12 +117,21 @@ impl Type {
         }
     }
 
-    /// Returns array element type and dimensions given an expected array type `Some(Array)`
+    /// Returns array element type and dimensions if self is an expected array type `Type::Array`
     pub fn get_type_array(&self, _span: Span) -> Result<(&Type, &Vec<usize>), ()> {
         match self {
             Type::Array(element_type, dimensions) => Ok((element_type, dimensions)),
             // TODO: throw mismatched type error
             _ => unimplemented!("ERROR: mismatched types, expected array"),
+        }
+    }
+
+    /// Returns tuple element types if self is an expected tuple type `Type::Tuple`
+    pub fn get_type_tuple(&self, _span: Span) -> Result<&Vec<Type>, ()> {
+        match self {
+            Type::Tuple(types) => Ok(types),
+            // TODO: throw mismatched type error
+            _ => unimplemented!("ERROR: mismatched types, expected tuple"),
         }
     }
 

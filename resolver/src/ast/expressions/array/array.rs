@@ -32,8 +32,6 @@ impl Expression {
         expressions: Vec<Box<UnresolvedSpreadOrExpression>>,
         span: Span,
     ) -> Result<Self, ()> {
-        let mut array = vec![];
-
         // Expressions should evaluate to array type or array element type
         let expected_element_type = if let Some(type_) = expected_type {
             let (element_type, dimensions) = type_.get_type_array(span.clone()).unwrap();
@@ -50,6 +48,7 @@ impl Expression {
 
         // Store actual array element type
         let mut actual_element_type = None;
+        let mut array = vec![];
 
         // Resolve all array elements
         for expression in expressions {

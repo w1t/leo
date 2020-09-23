@@ -97,7 +97,13 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::ArrayAccess(array, access, span) => {
                 Self::array_access(table, expected_type, array, access, span)
             }
-            // Arrays
+
+            // Tuples
+            UnresolvedExpression::Tuple(elements, span) => Self::tuple(table, expected_type, elements, span),
+            UnresolvedExpression::TupleAccess(tuple, index, span) => {
+                Self::tuple_access(table, expected_type, tuple, index, span)
+            }
+
             _ => return Err(()),
         }
     }
