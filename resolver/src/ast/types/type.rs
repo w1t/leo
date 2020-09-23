@@ -135,6 +135,15 @@ impl Type {
         }
     }
 
+    /// Returns circuit identifier if self is an expected circuit type `Type::Circuit`
+    pub fn get_type_circuit(&self, _span: Span) -> Result<&Identifier, ()> {
+        match self {
+            Type::Circuit(identifier) => Ok(identifier),
+            // TODO: throw mismatched type error
+            _ => unimplemented!("ERROR: mismatched types, expected circuit"),
+        }
+    }
+
     // /// Returns the data type - discarding wrapping types
     // pub fn get_type_data(&self, _span: Span) -> Result<&Type, ()> {
     //     match self {

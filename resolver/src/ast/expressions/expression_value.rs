@@ -16,6 +16,7 @@
 
 use crate::{
     expressions::array::{RangeOrExpression, SpreadOrExpression},
+    CircuitVariableDefinition,
     Expression,
 };
 use leo_typed::{GroupValue, Identifier, IntegerType, Span};
@@ -72,7 +73,7 @@ pub enum ExpressionValue {
 
     // Circuits
     // (defined_circuit_name, circuit_members, span)
-    // Circuit(Identifier, Vec<CircuitVariableDefinition>, Span),
+    Circuit(Identifier, Vec<CircuitVariableDefinition>, Span),
     // (declared_circuit name, circuit_member_name, span)
     CircuitMemberAccess(Box<Expression>, Identifier, Span),
     // (defined_circuit name, circuit_static_function_name, span)
@@ -118,6 +119,7 @@ impl ExpressionValue {
             ExpressionValue::Tuple(_, span) => span,
             ExpressionValue::TupleAccess(_, _, span) => span,
 
+            ExpressionValue::Circuit(_, _, span) => span,
             ExpressionValue::CircuitMemberAccess(_, _, span) => span,
             ExpressionValue::CircuitStaticFunctionAccess(_, _, span) => span,
 

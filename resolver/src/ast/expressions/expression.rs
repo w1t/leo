@@ -104,6 +104,17 @@ impl ResolvedNode for Expression {
                 Self::tuple_access(table, expected_type, tuple, index, span)
             }
 
+            // Circuits
+            UnresolvedExpression::Circuit(identifier, variables, span) => {
+                Self::circuit(table, expected_type, identifier, variables, span)
+            }
+            UnresolvedExpression::CircuitMemberAccess(circuit, member, span) => {
+                Self::circuit_access(table, expected_type, circuit, member, span)
+            }
+            UnresolvedExpression::CircuitStaticFunctionAccess(circuit, member, span) => {
+                Self::circuit_static_access(table, expected_type, circuit, member, span)
+            }
+
             _ => return Err(()),
         }
     }
