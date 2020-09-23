@@ -48,11 +48,11 @@ impl Expression {
         // Check the name and type for each circuit variable
         let mut variables_resolved = vec![];
 
-        for variable in variables.into_iter() {
+        for variable in variables {
             // Find variable by name
             let matched_variable = expected_variables
                 .iter()
-                .find(|variable| variable.identifier.eq(&variable.identifier));
+                .find(|expected| expected.identifier.eq(&variable.identifier));
 
             let variable_type = match matched_variable {
                 Some(variable_type) => variable_type,

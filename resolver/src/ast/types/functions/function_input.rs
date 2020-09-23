@@ -85,6 +85,20 @@ pub enum FunctionInputType {
 }
 
 impl FunctionInputType {
+    pub fn identifier(&self) -> &Identifier {
+        match self {
+            FunctionInputType::InputKeyword(identifier) => identifier,
+            FunctionInputType::Variable(variable) => &variable.identifier,
+        }
+    }
+
+    pub fn type_(&self) -> &Type {
+        match self {
+            FunctionInputType::InputKeyword(_) => unimplemented!("ERROR: input type not implemented"),
+            FunctionInputType::Variable(variable) => &variable.type_,
+        }
+    }
+
     /// Return a resolved function input given an unresolved function input
     pub fn from_unresolved(table: &SymbolTable, unresolved_input_variable: FunctionInput) -> Self {
         match unresolved_input_variable {

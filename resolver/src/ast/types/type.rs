@@ -144,6 +144,15 @@ impl Type {
         }
     }
 
+    /// Returns function identifier if self is an expected function type `Type::Function`
+    pub fn get_type_function(&self, _span: Span) -> Result<&Identifier, ()> {
+        match self {
+            Type::Function(identifier) => Ok(identifier),
+            // TODO: throw mismatched type error
+            _ => unimplemented!("ERROR: mismatched types, expected function"),
+        }
+    }
+
     // /// Returns the data type - discarding wrapping types
     // pub fn get_type_data(&self, _span: Span) -> Result<&Type, ()> {
     //     match self {

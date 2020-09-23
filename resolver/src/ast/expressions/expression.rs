@@ -115,6 +115,11 @@ impl ResolvedNode for Expression {
                 Self::circuit_static_access(table, expected_type, circuit, member, span)
             }
 
+            // Functions
+            UnresolvedExpression::FunctionCall(function, inputs, span) => {
+                Self::function_call(table, expected_type, function, inputs, span)
+            }
+
             _ => return Err(()),
         }
     }

@@ -116,6 +116,9 @@ impl ExpressionValue {
 
             ExpressionValue::IfElse(_, _, _, span) => span,
 
+            ExpressionValue::Array(_, span) => span,
+            ExpressionValue::ArrayAccess(_, _, span) => span,
+
             ExpressionValue::Tuple(_, span) => span,
             ExpressionValue::TupleAccess(_, _, span) => span,
 
@@ -125,9 +128,6 @@ impl ExpressionValue {
 
             ExpressionValue::FunctionCall(_, _, span) => span,
             ExpressionValue::CoreFunctionCall(_, _, span) => span,
-
-            ExpressionValue::Array(_, span) => span,
-            ExpressionValue::ArrayAccess(_, _, span) => span,
         }
     }
 }
