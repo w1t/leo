@@ -18,7 +18,7 @@ pub mod arithmetic;
 pub use self::arithmetic::*;
 
 pub mod array;
-pub use self::arrray::*;
+pub use self::array::*;
 
 pub mod binary;
 pub use self::binary::*;

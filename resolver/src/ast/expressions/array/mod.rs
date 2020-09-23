@@ -17,11 +17,11 @@
 pub mod array;
 pub use self::array::*;
 
-// pub mod array_access;
-// pub use self::array_access::*;
-//
-// pub mod range_or_expression;
-// pub use self::range_or_expression::*;
+pub mod array_access;
+pub use self::array_access::*;
+
+pub mod range_or_expression;
+pub use self::range_or_expression::*;
 
 pub mod spread_or_expression;
 pub use self::spread_or_expression::*;

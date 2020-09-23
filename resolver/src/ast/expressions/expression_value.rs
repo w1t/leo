@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{expressions::array::SpreadOrExpression, Expression};
+use crate::{
+    expressions::array::{RangeOrExpression, SpreadOrExpression},
+    Expression,
+};
 use leo_typed::{GroupValue, Identifier, IntegerType, Span};
 
 use serde::{Deserialize, Serialize};
@@ -59,7 +62,7 @@ pub enum ExpressionValue {
     // (array_elements, span)
     Array(Vec<Box<SpreadOrExpression>>, Span),
     // (array_name, range, span)
-    // ArrayAccess(Box<Expression>, Box<RangeOrExpression>, Span),
+    ArrayAccess(Box<Expression>, Box<RangeOrExpression>, Span),
 
     // Tuples
     // (tuple_elements, span)
@@ -120,6 +123,9 @@ impl ExpressionValue {
 
             ExpressionValue::FunctionCall(_, _, span) => span,
             ExpressionValue::CoreFunctionCall(_, _, span) => span,
+
+            ExpressionValue::Array(_, span) => span,
+            ExpressionValue::ArrayAccess(_, _, span) => span,
         }
     }
 }

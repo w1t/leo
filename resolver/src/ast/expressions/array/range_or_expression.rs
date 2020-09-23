@@ -15,43 +15,46 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{Expression, ResolvedNode, SymbolTable, Type};
-use leo_typed::SpreadOrExpression as UnresolvedSpreadOrExpression;
+use leo_typed::RangeOrExpression as UnresolvedRangeOrExpression;
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum SpreadOrExpression {
-    Spread(Expression),
+pub enum RangeOrExpression {
+    Range(Expression, Expression),
     Expression(Expression),
 }
 
-impl SpreadOrExpression {
+impl RangeOrExpression {
+    /// If this is a range, return an array type.
+    /// If this is an expression, return a data type.
     pub(crate) fn type_(&self) -> &Type {
         match self {
-            SpreadOrExpression::Spread(expression) => expression.type_(),
-            SpreadOrExpression::Expression(expression) => expression.type_(),
+            RangeOrExpression::Range(expresion, _expression) => expresion.type_(),
+            RangeOrExpression::Expression(expression) => expression.type_(),
         }
     }
 }
 
-impl ResolvedNode for SpreadOrExpression {
+impl ResolvedNode for RangeOrExpression {
     type Error = ();
-    type UnresolvedNode = (Option<Type>, UnresolvedSpreadOrExpression);
+    type UnresolvedNode = (Option<Type>, UnresolvedRangeOrExpression);
 
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let expected_type = unresolved.0;
-        let s_or_e = unresolved.1;
+        let r_or_e = unresolved.1;
 
-        Ok(match s_or_e {
-            UnresolvedSpreadOrExpression::Spread(spread) => {
-                let spread_resolved = Expression::resolve(table, (expected_type, spread)).unwrap();
-                // TODO: add check for array type or array element type
-                SpreadOrExpression::Spread(spread_resolved)
+        Ok(match r_or_e {
+            UnresolvedRangeOrExpression::Range(from, to) => {
+                let resolved_from = Expression::resolve(table, (expected_type.clone(), from.unwrap())).unwrap();
+                let resolved_to = Expression::resolve(table, (expected_type, to.unwrap())).unwrap();
+                // TODO: add check for range type and array type
+                RangeOrExpression::Range(resolved_from, resolved_to)
             }
-            UnresolvedSpreadOrExpression::Expression(expression) => {
+            UnresolvedRangeOrExpression::Expression(expression) => {
                 let expression_resolved = Expression::resolve(table, (expected_type, expression)).unwrap();
-                // TODO: add check for array type or array element type
-                SpreadOrExpression::Expression(expression_resolved)
+                // TODO: add check for array type
+                RangeOrExpression::Expression(expression_resolved)
             }
         })
     }

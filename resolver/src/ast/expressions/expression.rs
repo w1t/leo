@@ -40,7 +40,7 @@ impl Expression {
 
     /// Returns `Ok` if this expression resolves to an integer type
     pub fn check_type_integer(&self) -> Result<(), ()> {
-        Type::check_type_integer(&self.type_, self.value.span().clone())
+        self.type_.check_type_integer(self.value.span().clone())
     }
 }
 
@@ -92,6 +92,11 @@ impl ResolvedNode for Expression {
                 Self::conditional(table, expected_type, *cond, *first, *second, span)
             }
 
+            // Arrays
+            UnresolvedExpression::Array(elements, span) => Self::array(table, expected_type, elements, span),
+            UnresolvedExpression::ArrayAccess(array, access, span) => {
+                Self::array_access(table, expected_type, array, access, span)
+            }
             // Arrays
             _ => return Err(()),
         }

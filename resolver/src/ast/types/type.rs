@@ -97,7 +97,7 @@ impl Type {
         }
     }
 
-    /// Returns `Ok` if the the expected type is `Some` && expected type == actual type
+    /// Returns `Ok` if the given expected type is `Some` && expected type == actual type
     pub fn check_type(expected_option: &Option<Self>, actual: &Type, _span: Span) -> Result<(), ()> {
         if let Some(expected) = expected_option {
             if expected.ne(&actual) {
@@ -108,12 +108,29 @@ impl Type {
         Ok(())
     }
 
-    /// Returns `Ok` if the expected type is `Some(IntegerType)`
-    pub fn check_type_integer(expected: &Self, _span: Span) -> Result<(), ()> {
-        match expected {
+    /// Returns `Ok` given an expected integer type `Type::IntegerType`
+    pub fn check_type_integer(&self, _span: Span) -> Result<(), ()> {
+        match self {
             Type::IntegerType(_) => Ok(()),
             // TODO: throw mismatched type error
             _ => unimplemented!("ERROR: mismatched types, expected integer"),
         }
     }
+
+    /// Returns array element type and dimensions given an expected array type `Some(Array)`
+    pub fn get_type_array(&self, _span: Span) -> Result<(&Type, &Vec<usize>), ()> {
+        match self {
+            Type::Array(element_type, dimensions) => Ok((element_type, dimensions)),
+            // TODO: throw mismatched type error
+            _ => unimplemented!("ERROR: mismatched types, expected array"),
+        }
+    }
+
+    // /// Returns the data type - discarding wrapping types
+    // pub fn get_type_data(&self, _span: Span) -> Result<&Type, ()> {
+    //     match self {
+    //         Type::Array(element_type, _dimensions) => Ok(element_type),
+    //         Type::Tuple(types) => unimplemented!("")
+    //     }
+    // }
 }

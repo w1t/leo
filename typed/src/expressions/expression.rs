@@ -93,7 +93,7 @@ pub enum Expression {
     // Arrays
     // (array_elements, span)
     Array(Vec<Box<SpreadOrExpression>>, Span),
-    // (array_name, range, span)
+    // (array, range, span)
     ArrayAccess(Box<Expression>, Box<RangeOrExpression>, Span),
 
     // Tuples
