@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{types::FunctionOutputType, Assign, Definition, Expression, ResolvedNode, SymbolTable};
+use crate::{types::FunctionOutputType, Assign, Conditional, Definition, Expression, ResolvedNode, SymbolTable};
 use leo_typed::{Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
@@ -23,8 +23,8 @@ pub enum Statement {
     Return(Expression, Span),
     Definition(Definition),
     Assign(Assign),
-    // Conditional(ConditionalStatement, Span),
-    // Iteration(Identifier, Expression, Expression, Vec<Statement>, Span),
+    Conditional(Conditional),
+    Iteration(Identifier, Expression, Expression, Vec<Statement>, Span),
     // Console(ConsoleFunctionCall),
     Expression(Expression, Span),
 }
@@ -34,15 +34,20 @@ impl ResolvedNode for Statement {
     type UnresolvedNode = (FunctionOutputType, UnresolvedStatement);
 
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
-        let return_type = unresolved.0.type_;
+        let return_type = unresolved.0;
         let statement = unresolved.1;
 
         match statement {
-            UnresolvedStatement::Return(expression, span) => Self::resolve_return(table, return_type, expression, span),
+            UnresolvedStatement::Return(expression, span) => {
+                Self::resolve_return(table, return_type.type_, expression, span)
+            }
             UnresolvedStatement::Definition(declare, variables, expressions, span) => {
                 Self::definition(table, declare, variables, expressions, span)
             }
             UnresolvedStatement::Assign(assignee, expression, span) => Self::assign(table, assignee, expression, span),
+            UnresolvedStatement::Conditional(conditional, span) => {
+                Self::conditional(table, return_type, conditional, span)
+            }
 
             _ => Err(()),
         }

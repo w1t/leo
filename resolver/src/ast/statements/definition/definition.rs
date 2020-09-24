@@ -133,9 +133,6 @@ impl DefinitionVariables {
         expression: UnresolvedExpression,
         span: Span,
     ) -> Result<Self, ()> {
-        // // If the expected type is given, then it must be a tuple of types
-        // let expected_types = check_tuple_type(expected_type, expressions.len(), span.clone()).unwrap();
-
         // Resolve tuple expression
         let expression_resolved = Expression::resolve(table, (expected_type, expression)).unwrap();
 
