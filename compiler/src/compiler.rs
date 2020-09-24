@@ -160,6 +160,7 @@ impl<F: Field + PrimeField, G: GroupType<F>> Compiler<F, G> {
         // Use the typed parser to construct the typed syntax tree.
         let typed_tree = LeoTypedAst::new(&package_name, &ast);
 
+        // Use the resolver to type check the typed syntax tree
         let _resolved_tree = LeoResolvedAst::new(typed_tree.clone());
 
         self.program = typed_tree.into_repr();

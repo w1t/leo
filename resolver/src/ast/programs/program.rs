@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Function, ResolvedNode, SymbolTable};
+use crate::{Circuit, Function, ResolvedNode, SymbolTable, TestFunction};
 use leo_typed::{programs::Program as TypedProgram, Identifier};
 
 use serde::{Deserialize, Serialize};
@@ -26,7 +26,7 @@ pub static MAIN_FUNCTION_NAME: &str = "main";
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Program {
     // pub imports: Vec<Import>,
-    // pub circuits: HashMap<Identifier, Circuit>,
+    pub circuits: HashMap<Identifier, Circuit>,
     pub functions: HashMap<Identifier, Function>,
 }
 
@@ -36,26 +36,34 @@ impl ResolvedNode for Program {
 
     /// Returns a resolved program AST given an unresolved program AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
-        // let mut circuits = HashMap::new();
+        let mut circuits = HashMap::new();
         let mut functions = HashMap::new();
+        let mut tests = HashMap::new();
 
         // Resolve import statements
 
         // Resolve circuit definitions
-        // unresolved.circuits.into_iter().for_each(|(identifier, circuit)| {
-        //     let resolved_circuit = Circuit::resolve(&mut table, circuit).unwrap();
-        //
-        //     circuits.insert(identifier, resolved_circuit);
-        // });
+        unresolved.circuits.into_iter().for_each(|(identifier, circuit)| {
+            let resolved_circuit = Circuit::resolve(table, circuit).unwrap();
+
+            circuits.insert(identifier, resolved_circuit);
+        });
 
         // Resolve function statements
         unresolved.functions.into_iter().for_each(|(identifier, function)| {
-            let resolved_function = Function::resolve(table, function).unwrap();
+            let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
+            let resolved_function = Function::resolve(&mut child_table, function).unwrap();
 
             functions.insert(identifier, resolved_function);
         });
 
         // Resolve tests
+        unresolved.tests.into_iter().for_each(|(identifier, test)| {
+            let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
+            let resolved_test = TestFunction::resolve(&mut child_table, test).unwrap();
+
+            tests.insert(identifier, resolved_test);
+        });
 
         // Look for main function
         // let main = unresolved.functions.into_iter().find(|(identifier, _)| {
@@ -68,6 +76,6 @@ impl ResolvedNode for Program {
         //     None => unimplemented!("ERROR: main function not found"),
         // }
 
-        Ok(Program { functions })
+        Ok(Program { circuits, functions })
     }
 }

@@ -34,15 +34,15 @@ impl ResolvedNode for Function {
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let identifier = unresolved.identifier;
         // TODO: Throw an unknown function error
-        let type_ = table.get_function(&identifier).unwrap();
+        let type_ = table.get_function(&identifier).unwrap().clone();
 
-        // Create function context
-        let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
+        // // Create function context
+        // let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
 
         // Insert function inputs into symbol table
         for input in type_.inputs.clone() {
             // TODO: throw duplicate function input error
-            input.insert(&mut child_table).is_some();
+            input.insert(table);
         }
 
         // Pass expected function output to resolved statements
@@ -51,14 +51,11 @@ impl ResolvedNode for Function {
 
         // Resolve all function statements
         for (_i, statement) in unresolved.statements.into_iter().enumerate() {
-            let statement = Statement::resolve(&mut child_table, (output.clone(), statement)).unwrap();
+            let statement = Statement::resolve(table, (output.clone(), statement)).unwrap();
 
             statements.push(statement);
         }
 
-        Ok(Function {
-            type_: type_.clone(),
-            statements,
-        })
+        Ok(Function { type_, statements })
     }
 }

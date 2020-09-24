@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{CircuitType, Function, ResolvedNode, SymbolTable};
+use crate::{Attribute, CircuitType, Entry, Function, ResolvedNode, SymbolTable, Type};
 use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier, CircuitMember};
 
 use serde::{Deserialize, Serialize};
@@ -36,18 +36,39 @@ impl ResolvedNode for Circuit {
     /// Returns a resolved circuit AST given an unresolved circuit AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let identifier = unresolved.circuit_name;
-        let type_ = table.get_circuit(&identifier).unwrap();
+        let type_ = table.get_circuit(&identifier).unwrap().clone();
+
+        // Create circuit context
+        let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
+
+        // Create self variable
+        let self_key = "self".to_owned();
+        let self_variable = Entry {
+            identifier: identifier.clone(),
+            type_: Type::Circuit(identifier.clone()),
+            attributes: vec![Attribute::Mutable],
+        };
+        child_table.insert_variable(self_key, self_variable);
+
+        // Insert circuit functions into symbol table
+        for function in type_.functions.iter() {
+            let function_key = function.function.identifier.clone();
+            let function_type = function.function.clone();
+
+            child_table.insert_function(function_key, function_type);
+        }
 
         // Resolve all circuit functions
-        let mut functions = vec![];
+        let mut functions = HashMap::new();
 
         for member in unresolved.members {
             match member {
                 CircuitMember::CircuitVariable(_, _, _) => {}
                 CircuitMember::CircuitFunction(_, function) => {
-                    let function_resolved = Function::resolve(table, function).unwrap();
+                    let identifier = function.identifier.clone();
+                    let function_resolved = Function::resolve(&mut child_table.clone(), function).unwrap();
 
-                    functions.push(function_resolved);
+                    functions.insert(identifier, function_resolved);
                 }
             }
         }
