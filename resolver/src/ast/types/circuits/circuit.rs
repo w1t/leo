@@ -80,4 +80,26 @@ impl CircuitType {
 
         table.insert_circuit(circuit_identifier, circuit);
     }
+
+    /// Resolves the type of a circuit variable or the return type of a circuit function
+    pub fn member_type(&self, identifier: &Identifier) -> Result<&Type, ()> {
+        let matched_variable = self
+            .variables
+            .iter()
+            .find(|variable| variable.identifier.eq(identifier));
+
+        match matched_variable {
+            Some(variable) => Ok(&variable.type_),
+            None => {
+                let matched_function = self
+                    .functions
+                    .iter()
+                    .find(|function| function.function.identifier.eq(identifier));
+                match matched_function {
+                    Some(function) => Ok(&function.function.output.type_),
+                    None => Err(()),
+                }
+            }
+        }
+    }
 }

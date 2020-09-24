@@ -32,6 +32,16 @@ impl Entry {
     pub fn type_(&self) -> &Type {
         &self.type_
     }
+
+    /// Returns `true` if this variable's value can be modified
+    pub fn is_mutable(&self) -> bool {
+        self.attributes.contains(&Attribute::Mutable)
+    }
+
+    /// Returns `true` if this variable's value is static
+    pub fn is_static(&self) -> bool {
+        self.attributes.contains(&Attribute::Static)
+    }
 }
 
 impl TryFrom<Circuit> for Entry {

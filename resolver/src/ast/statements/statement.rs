@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{types::FunctionOutputType, Definition, Expression, ResolvedNode, SymbolTable};
+use crate::{types::FunctionOutputType, Assign, Definition, Expression, ResolvedNode, SymbolTable};
 use leo_typed::{Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 pub enum Statement {
     Return(Expression, Span),
     Definition(Definition),
-    // Assign(Assignee, Expression, Span),
+    Assign(Assign),
     // Conditional(ConditionalStatement, Span),
     // Iteration(Identifier, Expression, Expression, Vec<Statement>, Span),
     // Console(ConsoleFunctionCall),
@@ -42,6 +42,7 @@ impl ResolvedNode for Statement {
             UnresolvedStatement::Definition(declare, variables, expressions, span) => {
                 Self::definition(table, declare, variables, expressions, span)
             }
+            UnresolvedStatement::Assign(assignee, expression, span) => Self::assign(table, assignee, expression, span),
 
             _ => Err(()),
         }
