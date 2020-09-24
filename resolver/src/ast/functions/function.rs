@@ -50,8 +50,8 @@ impl ResolvedNode for Function {
         let mut statements = vec![];
 
         // Resolve all function statements
-        for (_i, unresolved_statement) in unresolved.statements.into_iter().enumerate() {
-            let statement = Statement::resolve(&mut child_table, (output.clone(), unresolved_statement)).unwrap();
+        for (_i, statement) in unresolved.statements.into_iter().enumerate() {
+            let statement = Statement::resolve(&mut child_table, (output.clone(), statement)).unwrap();
 
             statements.push(statement);
         }

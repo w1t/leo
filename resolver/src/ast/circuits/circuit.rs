@@ -15,7 +15,7 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{CircuitType, Function, ResolvedNode, SymbolTable};
-use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier};
+use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier, CircuitMember};
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -35,6 +35,23 @@ impl ResolvedNode for Circuit {
 
     /// Returns a resolved circuit AST given an unresolved circuit AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
-        Err(())
+        let identifier = unresolved.circuit_name;
+        let type_ = table.get_circuit(&identifier).unwrap();
+
+        // Resolve all circuit functions
+        let mut functions = vec![];
+
+        for member in unresolved.members {
+            match member {
+                CircuitMember::CircuitVariable(_, _, _) => {}
+                CircuitMember::CircuitFunction(_, function) => {
+                    let function_resolved = Function::resolve(table, function).unwrap();
+
+                    functions.push(function_resolved);
+                }
+            }
+        }
+
+        Ok(Circuit { type_, functions })
     }
 }
