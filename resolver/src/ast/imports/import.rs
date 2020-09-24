@@ -28,7 +28,7 @@ impl ResolvedNode for Import {
     type UnresolvedNode = UnresolvedImport;
 
     /// Return a type checked `Import` given an unresolved import
-    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+    fn resolve(_table: &mut SymbolTable, _resolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         Ok(Import {})
     }
 }

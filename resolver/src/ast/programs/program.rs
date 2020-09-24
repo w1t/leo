@@ -41,7 +41,7 @@ impl ResolvedNode for Program {
         let mut functions = HashMap::new();
         let mut tests = HashMap::new();
 
-        // Resolve import statements
+        // TODO: Resolve import statements
 
         // Resolve circuit definitions
         unresolved.circuits.into_iter().for_each(|(identifier, circuit)| {
