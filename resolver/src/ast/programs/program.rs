@@ -28,6 +28,7 @@ pub struct Program {
     // pub imports: Vec<Import>,
     pub circuits: HashMap<Identifier, Circuit>,
     pub functions: HashMap<Identifier, Function>,
+    pub tests: HashMap<Identifier, TestFunction>,
 }
 
 impl ResolvedNode for Program {
@@ -76,6 +77,10 @@ impl ResolvedNode for Program {
         //     None => unimplemented!("ERROR: main function not found"),
         // }
 
-        Ok(Program { circuits, functions })
+        Ok(Program {
+            circuits,
+            functions,
+            tests,
+        })
     }
 }

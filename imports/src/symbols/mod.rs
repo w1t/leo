@@ -14,5 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod import;
-pub use self::import::*;
+pub mod imported_symbols;
+pub use self::imported_symbols::*;

@@ -18,7 +18,7 @@ use leo_typed::{Import, ImportSymbol, Package, PackageAccess};
 
 /// Stores the the package file name and imported symbol from an import statement
 #[derive(Debug)]
-pub(crate) struct ImportedSymbols {
+pub struct ImportedSymbols {
     pub symbols: Vec<(String, ImportSymbol)>,
 }
 
@@ -27,7 +27,7 @@ impl ImportedSymbols {
         Self { symbols: vec![] }
     }
 
-    pub(crate) fn from(import: &Import) -> Self {
+    pub fn from(import: &Import) -> Self {
         let mut symbols = Self::new();
 
         symbols.from_package(&import.package);

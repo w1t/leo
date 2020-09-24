@@ -29,7 +29,7 @@ impl LeoResolvedAst {
     pub fn new(ast: LeoTypedAst) -> Result<Self, ResolverError> {
         // Get AST's for main program + imported programs
         let program = ast.into_repr();
-        let _imported_programs = ImportParser::parse(&program)?;
+        let imported_programs = ImportParser::parse(&program)?;
 
         //todo: load main function `input` register and state file types
 
