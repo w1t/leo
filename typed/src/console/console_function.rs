@@ -26,7 +26,7 @@ use leo_ast::console::{
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ConsoleFunction {
     Assert(Expression),
     Debug(FormattedString),

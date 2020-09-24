@@ -57,3 +57,9 @@ impl fmt::Display for FormattedString {
         write!(f, "{}", self.string)
     }
 }
+
+impl fmt::Debug for FormattedString {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.string)
+    }
+}

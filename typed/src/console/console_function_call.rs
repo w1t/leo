@@ -20,7 +20,7 @@ use leo_ast::console::ConsoleFunctionCall as AstConsoleFunctionCall;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ConsoleFunctionCall {
     pub function: ConsoleFunction,
     pub span: Span,

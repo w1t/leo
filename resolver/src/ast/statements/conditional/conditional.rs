@@ -47,6 +47,8 @@ impl Conditional {
         conditional: UnresolvedConditional,
         span: Span,
     ) -> Result<Self, ()> {
+        // TODO: Create child symbol table and add variables from parent
+
         // Resolve the condition to a boolean
         let type_boolean = Some(Type::Boolean);
         let condition_resolved = Expression::resolve(table, (type_boolean, conditional.condition)).unwrap();

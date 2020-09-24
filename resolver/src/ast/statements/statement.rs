@@ -13,8 +13,17 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{types::FunctionOutputType, Assign, Conditional, Definition, Expression, ResolvedNode, SymbolTable};
-use leo_typed::{Span, Statement as UnresolvedStatement};
+use crate::{
+    types::FunctionOutputType,
+    Assign,
+    Conditional,
+    Definition,
+    Expression,
+    Iteration,
+    ResolvedNode,
+    SymbolTable,
+};
+use leo_typed::{ConsoleFunctionCall, Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
 
@@ -24,8 +33,8 @@ pub enum Statement {
     Definition(Definition),
     Assign(Assign),
     Conditional(Conditional),
-    Iteration(Identifier, Expression, Expression, Vec<Statement>, Span),
-    // Console(ConsoleFunctionCall),
+    Iteration(Iteration),
+    Console(ConsoleFunctionCall),
     Expression(Expression, Span),
 }
 
@@ -48,6 +57,10 @@ impl ResolvedNode for Statement {
             UnresolvedStatement::Conditional(conditional, span) => {
                 Self::conditional(table, return_type, conditional, span)
             }
+            UnresolvedStatement::Iteration(index, start, stop, statements, span) => {
+                Self::iteration(table, return_type, index, start, stop, statements, span)
+            }
+            UnresolvedStatement::Console(console_function_call) => Ok(Statement::Console(console_function_call)),
 
             _ => Err(()),
         }
