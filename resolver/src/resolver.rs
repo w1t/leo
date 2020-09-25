@@ -17,6 +17,7 @@
 use crate::{Program, ResolverError, SymbolTable};
 use leo_imports::ImportParser;
 use leo_typed::LeoTypedAst;
+use std::path::PathBuf;
 
 /// A resolved syntax tree is represented as a `Program` without implicitly typed values.
 #[derive(Debug, Eq, PartialEq)]
@@ -26,7 +27,7 @@ pub struct LeoResolvedAst {
 
 impl LeoResolvedAst {
     /// Creates a new resolved syntax tree from a given typed syntax tree
-    pub fn new(ast: LeoTypedAst) -> Result<Self, ResolverError> {
+    pub fn new(ast: LeoTypedAst, path: PathBuf) -> Result<Self, ResolverError> {
         // Get AST's for main program + imported programs
         let program = ast.into_repr();
         let _imported_programs = ImportParser::parse(&program)?;
@@ -37,7 +38,11 @@ impl LeoResolvedAst {
         let mut symbol_table = SymbolTable::new(None);
 
         // Pass 1: Insert circuits and functions as variable types
-        symbol_table.insert_program_variables(&program);
+        symbol_table.insert_program_variables(&program).map_err(|mut e| {
+            e.set_path(path);
+
+            e
+        })?;
 
         // Pass 2: Insert circuits and functions as definitions
         symbol_table.insert_definitions(&program);

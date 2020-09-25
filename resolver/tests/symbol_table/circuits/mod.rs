@@ -13,18 +13,21 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::SymbolTableError;
-use leo_imports::ImportParserError;
-use leo_typed::Error as FormattedError;
 
-#[derive(Debug, Error)]
-pub enum ResolverError {
-    #[error("{}", _0)]
-    Error(#[from] FormattedError),
+use crate::TestLeoResolvedAst;
 
-    #[error("{}", _0)]
-    ImportParserError(#[from] ImportParserError),
+#[test]
+fn test_duplicate_circuit() {
+    let program_bytes = include_bytes!("duplicate_circuit.leo");
+    let resolver = TestLeoResolvedAst::new(program_bytes);
 
-    #[error("{}", _0)]
-    SymbolTableError(#[from] SymbolTableError),
+    resolver.expect_symbol_table_error();
+}
+
+#[test]
+fn test_duplicate_function() {
+    let program_bytes = include_bytes!("duplicate_function.leo");
+    let resolver = TestLeoResolvedAst::new(program_bytes);
+
+    resolver.expect_symbol_table_error();
 }

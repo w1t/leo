@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{CircuitType, Entry, FunctionType};
+use crate::{CircuitType, Entry, FunctionType, SymbolTableError};
 use leo_typed::{Identifier, Program};
 
 use leo_imports::ImportParser;
@@ -117,24 +117,30 @@ impl SymbolTable {
     /// Inserts all circuits and functions as variable types
     /// No type resolution performed at this step
     /// `let f = Foo { }; // f has type circuit Foo`
-    pub fn insert_program_variables(&mut self, program: &Program) {
+    pub fn insert_program_variables(&mut self, program: &Program) -> Result<(), SymbolTableError> {
         // insert program circuits
-        program.circuits.iter().for_each(|(identifier, circuit)| {
-            let duplicate = self.insert_variable(identifier.to_string(), Entry::try_from(circuit.clone()).unwrap());
-            // TODO: throw error for duplicate circuit names
+        for (identifier, circuit) in program.circuits.iter() {
+            let duplicate = self.insert_variable(identifier.to_string(), Entry::from(circuit.clone()));
             if duplicate.is_some() {
-                unimplemented!("ERROR: duplicate circuit definition `{}`", duplicate.unwrap());
+                return Err(SymbolTableError::duplicate_circuit(
+                    identifier.clone(),
+                    circuit.circuit_name.span.clone(),
+                ));
             }
-        });
+        }
 
         // insert program functions
-        program.functions.iter().for_each(|(identifier, function)| {
-            let duplicate = self.insert_variable(identifier.to_string(), Entry::try_from(function.clone()).unwrap());
-            // TODO: throw error for duplicate function names
+        for (identifier, function) in program.functions.iter() {
+            let duplicate = self.insert_variable(identifier.to_string(), Entry::from(function.clone()));
             if duplicate.is_some() {
-                unimplemented!("ERROR: duplicate function definition `{}`", duplicate.unwrap());
+                return Err(SymbolTableError::duplicate_function(
+                    identifier.clone(),
+                    function.span.clone(),
+                ));
             }
-        });
+        }
+
+        Ok(())
     }
 
     /// Inserts all circuits and functions as their respective types with additional information

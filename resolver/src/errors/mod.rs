@@ -16,3 +16,6 @@
 
 pub mod resolver;
 pub use self::resolver::*;
+
+pub mod symbol_table;
+pub use self::symbol_table::*;

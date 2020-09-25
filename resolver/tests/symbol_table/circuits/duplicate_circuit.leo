@@ -1,0 +1,2 @@
+circuit Foo {}
+circuit Foo {}

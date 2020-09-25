@@ -17,7 +17,7 @@ use crate::ast::{Attribute, Type};
 use leo_typed::{Circuit, Function, Identifier};
 
 use crate::FunctionInputVariableType;
-use std::{convert::TryFrom, fmt};
+use std::fmt;
 
 /// A symbol table entry stores the type and attribute information for an identifier
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -44,51 +44,37 @@ impl Entry {
     }
 }
 
-impl TryFrom<Circuit> for Entry {
-    type Error = ();
-
-    fn try_from(value: Circuit) -> Result<Self, Self::Error> {
+impl From<Circuit> for Entry {
+    fn from(value: Circuit) -> Self {
         let identifier = value.circuit_name;
-        let type_ = Type::Circuit(identifier.clone());
-        let attributes = vec![];
 
-        Ok(Entry {
-            identifier,
-            type_,
-            attributes,
-        })
+        Entry {
+            identifier: identifier.clone(),
+            type_: Type::Circuit(identifier),
+            attributes: vec![],
+        }
     }
 }
 
-impl TryFrom<Function> for Entry {
-    type Error = ();
-
-    fn try_from(value: Function) -> Result<Self, Self::Error> {
+impl From<Function> for Entry {
+    fn from(value: Function) -> Self {
         let identifier = value.identifier;
-        let type_ = Type::Function(identifier.clone());
-        let attributes = vec![];
 
-        Ok(Entry {
-            identifier,
-            type_,
-            attributes,
-        })
+        Entry {
+            identifier: identifier.clone(),
+            type_: Type::Function(identifier.clone()),
+            attributes: vec![],
+        }
     }
 }
 
-impl TryFrom<FunctionInputVariableType> for Entry {
-    type Error = ();
-
-    fn try_from(value: FunctionInputVariableType) -> Result<Self, Self::Error> {
-        let identifier = value.identifier;
-        let type_ = value.type_;
-        let attributes = value.attributes;
-
-        Ok(Entry {
-            identifier,
-            type_,
-            attributes,
-        })
+impl From<FunctionInputVariableType> for Entry {
+    fn from(value: FunctionInputVariableType) -> Self {
+        Entry {
+            identifier: value.identifier,
+            type_: value.type_,
+            attributes: value.attributes,
+        }
     }
 }
 

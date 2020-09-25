@@ -18,7 +18,6 @@ use crate::{Attribute, Entry, SymbolTable, Type};
 use leo_typed::{FunctionInput, FunctionInputVariable, Identifier};
 
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FunctionInputVariableType {
@@ -72,7 +71,7 @@ impl FunctionInputVariableType {
     /// Insert this function variable into the given symbol table
     pub fn insert(&self, table: &mut SymbolTable) -> Option<Entry> {
         let key = self.identifier.name.clone();
-        let value = Entry::try_from(self.clone()).unwrap();
+        let value = Entry::from(self.clone());
 
         table.insert_variable(key, value)
     }
