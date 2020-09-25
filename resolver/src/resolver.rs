@@ -45,7 +45,7 @@ impl LeoResolvedAst {
         })?;
 
         // Pass 2: Insert circuits and functions as definitions
-        symbol_table.insert_definitions(&program);
+        symbol_table.insert_definitions(&program)?;
 
         // Pass 2: Perform semantic analysis on program
         // At each AST node:
@@ -59,7 +59,10 @@ impl LeoResolvedAst {
 
 /// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types
 pub trait ResolvedNode {
+    /// The expected error type if the type resolution fails
     type Error;
+
+    /// The `leo-typed` AST node that we are type checking
     type UnresolvedNode;
 
     /// Returns a resolved AST representation given an unresolved AST representation and symbol table

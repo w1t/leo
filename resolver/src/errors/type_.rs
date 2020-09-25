@@ -14,45 +14,43 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::TypeError;
 use leo_typed::{Error as FormattedError, Identifier, Span};
 
 use std::path::PathBuf;
 
-/// Errors encountered when tracking variable, function, and circuit names in a program
+/// Errors encountered when resolving types
 #[derive(Debug, Error)]
-pub enum SymbolTableError {
+pub enum TypeError {
     #[error("{}", _0)]
     Error(#[from] FormattedError),
-
-    #[error("{}", _0)]
-    TypeError(#[from] TypeError),
 }
 
-impl SymbolTableError {
+impl TypeError {
     /// Set the filepath for the error stacktrace
     pub fn set_path(&mut self, path: PathBuf) {
         match self {
-            SymbolTableError::Error(error) => error.set_path(path),
-            SymbolTableError::TypeError(error) => error.set_path(path),
+            TypeError::Error(error) => error.set_path(path),
         }
     }
 
     /// Return a new formatted error with a given message and span information
     fn new_from_span(message: String, span: Span) -> Self {
-        SymbolTableError::Error(FormattedError::new_from_span(message, span))
+        TypeError::Error(FormattedError::new_from_span(message, span))
     }
 
-    /// Two circuits have been defined with the same name
-    pub fn duplicate_circuit(identifier: Identifier, span: Span) -> Self {
-        let message = format!("Duplicate circuit definition found for `{}`", identifier);
+    /// Found an unknown circuit name
+    pub fn undefined_circuit(identifier: Identifier) -> Self {
+        let message = format!(
+            "Type circuit `{}` must be defined before it is used in an expression",
+            identifier.name
+        );
 
-        Self::new_from_span(message, span)
+        Self::new_from_span(message, identifier.span)
     }
 
-    /// Two functions have been defined with the same name
-    pub fn duplicate_function(identifier: Identifier, span: Span) -> Self {
-        let message = format!("Duplicate function definition found for `{}`", identifier);
+    /// The `Self` keyword was used outside of a circuit
+    pub fn self_not_available(span: Span) -> Self {
+        let message = format!("Type `Self` is only available in circuit definitions and functions");
 
         Self::new_from_span(message, span)
     }

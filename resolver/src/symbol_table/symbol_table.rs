@@ -20,8 +20,6 @@ use leo_typed::{Identifier, Program};
 use leo_imports::ImportParser;
 use std::collections::HashMap;
 
-use std::convert::TryFrom;
-
 /// A abstract data type that tracks the current bindings of identifier names in a Leo program
 /// A symbol table has access to all function and circuit names in its parent's symbol table
 /// A symbol table cannot access names in a child's symbol table
@@ -121,6 +119,8 @@ impl SymbolTable {
         // insert program circuits
         for (identifier, circuit) in program.circuits.iter() {
             let duplicate = self.insert_variable(identifier.to_string(), Entry::from(circuit.clone()));
+
+            // Throw an error for duplicate circuit names
             if duplicate.is_some() {
                 return Err(SymbolTableError::duplicate_circuit(
                     identifier.clone(),
@@ -132,6 +132,8 @@ impl SymbolTable {
         // insert program functions
         for (identifier, function) in program.functions.iter() {
             let duplicate = self.insert_variable(identifier.to_string(), Entry::from(function.clone()));
+
+            // Throw an error for duplicate function names
             if duplicate.is_some() {
                 return Err(SymbolTableError::duplicate_function(
                     identifier.clone(),
@@ -145,15 +147,17 @@ impl SymbolTable {
 
     /// Inserts all circuits and functions as their respective types with additional information
     /// Type resolution for circuit and function signatures completed during this step
-    pub fn insert_definitions(&mut self, program: &Program) {
+    pub fn insert_definitions(&mut self, program: &Program) -> Result<(), SymbolTableError> {
         // insert program circuit types
-        program.circuits.iter().for_each(|(_identifier, unresolved_circuit)| {
-            CircuitType::insert_definition(self, unresolved_circuit.clone());
-        });
+        for (_, unresolved_circuit) in program.circuits.iter() {
+            CircuitType::insert_definition(self, unresolved_circuit.clone())?;
+        }
 
         // insert program function types
-        program.functions.iter().for_each(|(_identifier, unresolved_function)| {
-            FunctionType::insert_definition(self, unresolved_function.clone())
-        });
+        for (_, unresolved_function) in program.functions.iter() {
+            FunctionType::insert_definition(self, unresolved_function.clone())?;
+        }
+
+        Ok(())
     }
 }

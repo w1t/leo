@@ -20,6 +20,7 @@ use crate::{
     FunctionType,
     SymbolTable,
     Type,
+    TypeError,
 };
 use leo_typed::{Circuit, CircuitMember, Identifier};
 
@@ -37,7 +38,7 @@ pub struct CircuitType {
 
 impl CircuitType {
     /// Resolve a circuit definition and insert it into the given symbol table.
-    pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) {
+    pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) -> Result<(), TypeError> {
         let circuit_identifier = unresolved_circuit.circuit_name;
         let mut variables = vec![];
         let mut functions = vec![];
@@ -46,7 +47,12 @@ impl CircuitType {
             match member {
                 CircuitMember::CircuitVariable(mutable, variable_identifier, type_) => {
                     // Resolve the type of the circuit member variable
-                    let type_ = Type::from_circuit(table, circuit_identifier.clone(), type_);
+                    let type_ = Type::from_circuit(
+                        table,
+                        type_,
+                        circuit_identifier.clone(),
+                        circuit_identifier.span.clone(),
+                    )?;
 
                     let attributes = if mutable { vec![Attribute::Mutable] } else { vec![] };
 
@@ -59,7 +65,7 @@ impl CircuitType {
                     variables.push(variable);
                 }
                 CircuitMember::CircuitFunction(is_static, function) => {
-                    let function_type = FunctionType::from_circuit(table, circuit_identifier.clone(), function);
+                    let function_type = FunctionType::from_circuit(table, circuit_identifier.clone(), function)?;
                     let attributes = if is_static { vec![Attribute::Static] } else { vec![] };
 
                     let function = CircuitFunctionType {
@@ -79,6 +85,8 @@ impl CircuitType {
         };
 
         table.insert_circuit(circuit_identifier, circuit);
+
+        Ok(())
     }
 
     /// Resolves the type of a circuit variable or the return type of a circuit function

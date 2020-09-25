@@ -191,7 +191,12 @@ impl Statement {
     ) -> Result<Self, ()> {
         let num_variables = variables.names.len();
         let num_values = expressions.len();
-        let expected_type = variables.type_.clone().map(|type_| Type::from_unresolved(table, type_));
+
+        // If an explicit type is given check that it is valid
+        let expected_type = match &variables.type_ {
+            Some(type_) => Some(Type::resolve(table, (type_.clone(), span.clone())).unwrap()),
+            None => None,
+        };
 
         let variables = if num_variables == 1 && num_values == 1 {
             // Define a single variable with a single value

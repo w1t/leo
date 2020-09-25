@@ -20,5 +20,8 @@ pub use self::function::*;
 pub mod function_input;
 pub use self::function_input::*;
 
+pub mod function_input_variable;
+pub use self::function_input_variable::*;
+
 pub mod function_output;
 pub use self::function_output::*;

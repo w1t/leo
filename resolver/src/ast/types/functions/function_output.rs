@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{SymbolTable, Type};
+use crate::{ResolvedNode, SymbolTable, Type, TypeError};
 
-use leo_typed::{Identifier, Type as UnresolvedType};
+use leo_typed::{Identifier, Span, Type as UnresolvedType};
 
 use serde::{Deserialize, Serialize};
 
@@ -28,22 +28,31 @@ pub struct FunctionOutputType {
 
 impl FunctionOutputType {
     /// Return a resolved function output type given an unresolved function output
-    pub fn from_unresolved(table: &SymbolTable, unresolved: Option<UnresolvedType>) -> Self {
+    pub fn from_unresolved(
+        table: &mut SymbolTable,
+        unresolved: Option<UnresolvedType>,
+        span: Span,
+    ) -> Result<Self, TypeError> {
         let output_type = match unresolved {
             None => Type::Tuple(vec![]), // functions with no return value return an empty tuple,
-            Some(type_) => Type::from_unresolved(table, type_),
+            Some(type_) => Type::resolve(table, (type_, span))?,
         };
 
-        FunctionOutputType { type_: output_type }
+        Ok(FunctionOutputType { type_: output_type })
     }
 
     /// Return a resolved function output type from inside of a circuit
-    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, unresolved: Option<UnresolvedType>) -> Self {
+    pub fn from_circuit(
+        table: &mut SymbolTable,
+        circuit_name: Identifier,
+        unresolved: Option<UnresolvedType>,
+        span: Span,
+    ) -> Result<Self, TypeError> {
         let output_type = match unresolved {
             None => Type::Tuple(vec![]),
-            Some(type_) => Type::from_circuit(table, circuit_name, type_),
+            Some(type_) => Type::from_circuit(table, type_, circuit_name, span)?,
         };
 
-        FunctionOutputType { type_: output_type }
+        Ok(FunctionOutputType { type_: output_type })
     }
 }

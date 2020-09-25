@@ -14,73 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Attribute, Entry, SymbolTable, Type};
-use leo_typed::{FunctionInput, FunctionInputVariable, Identifier};
+use crate::{Entry, FunctionInputVariableType, ResolvedNode, SymbolTable, Type, TypeError};
+use leo_typed::{FunctionInput, Identifier};
 
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct FunctionInputVariableType {
-    /// Name of function input
-    pub identifier: Identifier,
-    /// Type of function input
-    pub type_: Type,
-    /// The attributes of the function variable
-    pub attributes: Vec<Attribute>,
-}
-
-impl FunctionInputVariableType {
-    /// Return a resolved function input variable type given an unresolved function input variable
-    pub fn from_unresolved(table: &SymbolTable, unresolved_function_input: FunctionInputVariable) -> Self {
-        let identifier = unresolved_function_input.identifier;
-        let type_ = Type::from_unresolved(table, unresolved_function_input.type_);
-        let attributes = if unresolved_function_input.mutable {
-            vec![Attribute::Mutable]
-        } else {
-            vec![]
-        };
-
-        FunctionInputVariableType {
-            identifier,
-            type_,
-            attributes,
-        }
-    }
-
-    /// Return a resolved function input variable from inside of a circuit
-    pub fn from_circuit(
-        table: &SymbolTable,
-        circuit_name: Identifier,
-        unresolved_function_input: FunctionInputVariable,
-    ) -> Self {
-        let identifier = unresolved_function_input.identifier;
-        let type_ = Type::from_circuit(table, circuit_name, unresolved_function_input.type_);
-        let attributes = if unresolved_function_input.mutable {
-            vec![Attribute::Mutable]
-        } else {
-            vec![]
-        };
-
-        FunctionInputVariableType {
-            identifier,
-            type_,
-            attributes,
-        }
-    }
-
-    /// Insert this function variable into the given symbol table
-    pub fn insert(&self, table: &mut SymbolTable) -> Option<Entry> {
-        let key = self.identifier.name.clone();
-        let value = Entry::from(self.clone());
-
-        table.insert_variable(key, value)
-    }
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FunctionInputType {
     InputKeyword(Identifier),
     Variable(FunctionInputVariableType),
+}
+
+impl ResolvedNode for FunctionInputType {
+    type Error = TypeError;
+    type UnresolvedNode = FunctionInput;
+
+    /// Type check a function input. Can be a typed variable or `input`.
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        Ok(match unresolved {
+            FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
+            FunctionInput::Variable(variable) => {
+                let variable_resolved = FunctionInputVariableType::resolve(table, variable)?;
+
+                FunctionInputType::Variable(variable_resolved)
+            }
+        })
+    }
 }
 
 impl FunctionInputType {
@@ -98,29 +57,21 @@ impl FunctionInputType {
         }
     }
 
-    /// Return a resolved function input given an unresolved function input
-    pub fn from_unresolved(table: &SymbolTable, unresolved_input_variable: FunctionInput) -> Self {
-        match unresolved_input_variable {
-            FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
-            FunctionInput::Variable(unresolved_function_input) => {
-                let function_input = FunctionInputVariableType::from_unresolved(table, unresolved_function_input);
-
-                FunctionInputType::Variable(function_input)
-            }
-        }
-    }
-
     /// Return a resolved function input from inside of a circuit
-    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, unresolved_input: FunctionInput) -> Self {
-        match unresolved_input {
+    pub fn from_circuit(
+        table: &mut SymbolTable,
+        unresolved: FunctionInput,
+        circuit_name: Identifier,
+    ) -> Result<Self, TypeError> {
+        Ok(match unresolved {
             FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
             FunctionInput::Variable(unresolved_function_input) => {
                 let function_input =
-                    FunctionInputVariableType::from_circuit(table, circuit_name, unresolved_function_input);
+                    FunctionInputVariableType::from_circuit(table, unresolved_function_input, circuit_name)?;
 
                 FunctionInputType::Variable(function_input)
             }
-        }
+        })
     }
 
     /// Insert this function input into the given symbol table

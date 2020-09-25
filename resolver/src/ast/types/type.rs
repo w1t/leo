@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::SymbolTable;
+use crate::{ResolvedNode, SymbolTable, TypeError};
 
 use leo_typed::{Identifier, IntegerType, Span, Type as UnresolvedType};
 use serde::{Deserialize, Serialize};
@@ -37,10 +37,16 @@ pub enum Type {
     Function(Identifier),
 }
 
-impl Type {
+impl ResolvedNode for Type {
+    type Error = TypeError;
+    type UnresolvedNode = (UnresolvedType, Span);
+
     /// Resolves the given type. Cannot be an implicit or Self type.
-    pub fn from_unresolved(table: &SymbolTable, type_: UnresolvedType) -> Self {
-        match type_ {
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        let type_ = unresolved.0;
+        let span = unresolved.1;
+
+        Ok(match type_ {
             UnresolvedType::Address => Type::Address,
             UnresolvedType::Boolean => Type::Boolean,
             UnresolvedType::Field => Type::Field,
@@ -48,53 +54,65 @@ impl Type {
             UnresolvedType::IntegerType(integer) => Type::IntegerType(integer),
 
             UnresolvedType::Array(type_, dimensions) => {
-                let array_type = Type::from_unresolved(table, *type_);
+                let array_type = Type::resolve(table, (*type_, span))?;
+
                 Type::Array(Box::new(array_type), dimensions)
             }
             UnresolvedType::Tuple(types) => {
                 let tuple_types = types
                     .into_iter()
-                    .map(|type_| Type::from_unresolved(table, type_))
-                    .collect::<Vec<_>>();
+                    .map(|type_| Type::resolve(table, (type_, span.clone())))
+                    .collect::<Result<Vec<_>, _>>()?;
 
                 Type::Tuple(tuple_types)
             }
 
             UnresolvedType::Circuit(identifier) => {
-                // Check that circuit exists
+                // Lookup the circuit type in the symbol table
                 let exists = table.get_variable(&identifier.name);
-                // TODO: throw error for undefined circuit type
+
+                // Throw an error if the circuit does not exist
                 if exists.is_none() {
-                    unimplemented!("ERROR: undefined circuit type error")
+                    return Err(TypeError::undefined_circuit(identifier));
                 }
 
                 Type::Circuit(identifier)
             }
-            // TODO: throw error for invalid self type use
-            UnresolvedType::SelfType => unimplemented!("ERROR: SelfType does not refer to a valid circuit definition"),
-        }
-    }
 
+            UnresolvedType::SelfType => {
+                // Throw an error for using `Self` outside of a circuit
+                return Err(TypeError::self_not_available(span));
+            }
+        })
+    }
+}
+
+impl Type {
     /// Resolve a type inside of a circuit definition.
     /// If this type is SelfType, return the circuit's type
-    pub fn from_circuit(table: &SymbolTable, circuit_name: Identifier, type_: UnresolvedType) -> Self {
-        match type_ {
+    pub fn from_circuit(
+        table: &mut SymbolTable,
+        type_: UnresolvedType,
+        circuit_name: Identifier,
+        span: Span,
+    ) -> Result<Self, TypeError> {
+        Ok(match type_ {
             UnresolvedType::Array(type_, dimensions) => {
-                let array_type = Type::from_circuit(table, circuit_name, *type_);
+                let array_type = Type::from_circuit(table, *type_, circuit_name, span)?;
                 Type::Array(Box::new(array_type), dimensions)
             }
             UnresolvedType::Tuple(types) => {
                 let tuple_types = types
                     .into_iter()
-                    .map(|type_| Type::from_circuit(table, circuit_name.clone(), type_))
-                    .collect::<Vec<_>>();
+                    .map(|type_| Type::from_circuit(table, type_, circuit_name.clone(), span.clone()))
+                    .collect::<Result<Vec<_>, _>>()?;
 
                 Type::Tuple(tuple_types)
             }
             UnresolvedType::SelfType => Type::Circuit(circuit_name),
             // The unresolved type does not depend on the current circuit definition
-            unresolved => Type::from_unresolved(table, unresolved),
-        }
+            unresolved => Type::resolve(table, (unresolved, span))?,
+        })
     }
 
     /// Returns `Ok` if the given expected type is `Some` && expected type == actual type
