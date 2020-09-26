@@ -14,23 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod address;
-pub use self::address::*;
-
 pub mod circuits;
 pub use self::circuits::*;
-
-pub mod fields;
-pub use self::fields::*;
 
 pub mod functions;
 pub use self::functions::*;
 
-pub mod groups;
-pub use self::groups::*;
-
-pub mod integers;
-pub use self::integers::*;
-
-pub mod r#type;
-pub use self::r#type::*;
+pub mod type_;
+pub use self::type_::*;

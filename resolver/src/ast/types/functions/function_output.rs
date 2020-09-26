@@ -26,21 +26,25 @@ pub struct FunctionOutputType {
     pub type_: Type,
 }
 
-impl FunctionOutputType {
-    /// Return a resolved function output type given an unresolved function output
-    pub fn from_unresolved(
-        table: &mut SymbolTable,
-        unresolved: Option<UnresolvedType>,
-        span: Span,
-    ) -> Result<Self, TypeError> {
-        let output_type = match unresolved {
-            None => Type::Tuple(vec![]), // functions with no return value return an empty tuple,
+impl ResolvedNode for FunctionOutputType {
+    type Error = TypeError;
+    /// (function output, span)
+    type UnresolvedNode = (Option<UnresolvedType>, Span);
+
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, TypeError> {
+        let function_output = unresolved.0;
+        let span = unresolved.1;
+
+        let type_ = match function_output {
+            None => Type::Tuple(vec![]), // functions with no return value return an empty tuple
             Some(type_) => Type::resolve(table, (type_, span))?,
         };
 
-        Ok(FunctionOutputType { type_: output_type })
+        Ok(FunctionOutputType { type_ })
     }
+}
 
+impl FunctionOutputType {
     /// Return a resolved function output type from inside of a circuit
     pub fn from_circuit(
         table: &mut SymbolTable,

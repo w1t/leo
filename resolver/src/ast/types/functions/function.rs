@@ -28,32 +28,44 @@ use serde::{Deserialize, Serialize};
 pub struct FunctionType {
     /// The name of the function definition
     pub identifier: Identifier,
+
     /// The function inputs
     pub inputs: Vec<FunctionInputType>,
-    /// The function return output
+
+    /// The function output
     pub output: FunctionOutputType,
+}
+
+impl ResolvedNode for FunctionType {
+    type Error = TypeError;
+    type UnresolvedNode = Function;
+
+    /// Type check a function definition
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        let mut inputs_resolved = vec![];
+
+        // Type check function inputs
+        for input in unresolved.input {
+            let input = FunctionInputType::resolve(table, input)?;
+            inputs_resolved.push(input);
+        }
+
+        // Type check function output
+        let output = FunctionOutputType::resolve(table, (unresolved.returns, unresolved.span))?;
+
+        Ok(FunctionType {
+            identifier: unresolved.identifier,
+            inputs: inputs_resolved,
+            output,
+        })
+    }
 }
 
 impl FunctionType {
     /// Resolve a function definition and insert it into the given symbol table
     pub fn insert_definition(table: &mut SymbolTable, unresolved_function: Function) -> Result<(), TypeError> {
-        let function_identifier = unresolved_function.identifier;
-        let mut inputs = vec![];
-
-        // Type check function inputs
-        for unresolved_input in unresolved_function.input {
-            let input = FunctionInputType::resolve(table, unresolved_input)?;
-            inputs.push(input);
-        }
-
-        // Type check function output
-        let output = FunctionOutputType::from_unresolved(table, unresolved_function.returns, unresolved_function.span)?;
-
-        let function = FunctionType {
-            identifier: function_identifier.clone(),
-            inputs,
-            output,
-        };
+        let function_identifier = unresolved_function.identifier.clone();
+        let function = Self::resolve(table, unresolved_function)?;
 
         table.insert_function(function_identifier, function);
 

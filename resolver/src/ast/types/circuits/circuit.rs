@@ -18,6 +18,7 @@ use crate::{
     types::circuits::{CircuitFunctionType, CircuitVariableType},
     Attribute,
     FunctionType,
+    ResolvedNode,
     SymbolTable,
     Type,
     TypeError,
@@ -30,22 +31,26 @@ use serde::{Deserialize, Serialize};
 pub struct CircuitType {
     /// The name of the circuit definition
     pub identifier: Identifier,
+
     /// The circuit member variables
     pub variables: Vec<CircuitVariableType>,
+
     /// The circuit member functions
     pub functions: Vec<CircuitFunctionType>,
 }
 
-impl CircuitType {
-    /// Resolve a circuit definition and insert it into the given symbol table.
-    pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) -> Result<(), TypeError> {
-        let circuit_identifier = unresolved_circuit.circuit_name;
+impl ResolvedNode for CircuitType {
+    type Error = TypeError;
+    type UnresolvedNode = Circuit;
+
+    fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        let circuit_identifier = unresolved.circuit_name;
         let mut variables = vec![];
         let mut functions = vec![];
 
-        for member in unresolved_circuit.members {
+        for member in unresolved.members {
             match member {
-                CircuitMember::CircuitVariable(mutable, variable_identifier, type_) => {
+                CircuitMember::CircuitVariable(is_mutable, variable_identifier, type_) => {
                     // Resolve the type of the circuit member variable
                     let type_ = Type::from_circuit(
                         table,
@@ -54,7 +59,7 @@ impl CircuitType {
                         circuit_identifier.span.clone(),
                     )?;
 
-                    let attributes = if mutable { vec![Attribute::Mutable] } else { vec![] };
+                    let attributes = if is_mutable { vec![Attribute::Mutable] } else { vec![] };
 
                     let variable = CircuitVariableType {
                         identifier: variable_identifier,
@@ -78,11 +83,19 @@ impl CircuitType {
             }
         }
 
-        let circuit = CircuitType {
+        Ok(CircuitType {
             identifier: circuit_identifier.clone(),
             variables,
             functions,
-        };
+        })
+    }
+}
+
+impl CircuitType {
+    /// Resolve a circuit definition and insert it into the given symbol table.
+    pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) -> Result<(), TypeError> {
+        let circuit_identifier = unresolved_circuit.circuit_name.clone();
+        let circuit = Self::resolve(table, unresolved_circuit)?;
 
         table.insert_circuit(circuit_identifier, circuit);
 
