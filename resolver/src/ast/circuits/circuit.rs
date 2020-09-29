@@ -36,7 +36,7 @@ impl ResolvedNode for Circuit {
     /// Returns a resolved circuit AST given an unresolved circuit AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let identifier = unresolved.circuit_name;
-        let type_ = table.get_circuit(&identifier).unwrap().clone();
+        let type_ = table.get_circuit(&identifier.name).unwrap().clone();
 
         // Create circuit context
         let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));

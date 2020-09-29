@@ -32,13 +32,9 @@ impl Expression {
         Type::check_type(&expected_type, &type_, span.clone())?;
 
         // Lookup circuit in symbol table
-        let circuit_option = table.get_circuit(&identifier);
-
-        // Throw error for undefined circuit
-        let circuit = match circuit_option {
-            Some(circuit) => circuit,
-            None => return Err(ExpressionError::undefined_circuit(identifier)),
-        };
+        let circuit = table
+            .get_circuit(&identifier.name)
+            .ok_or(ExpressionError::undefined_circuit(identifier.clone()))?;
 
         // Check the number of variables given
         let expected_variables = circuit.variables.clone();

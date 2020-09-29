@@ -11,20 +11,6 @@
 // GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::TestLeoResolvedAst;
 
-#[test]
-fn test_duplicate_circuit() {
-    let program_bytes = include_bytes!("duplicate_circuit.leo");
-    let resolver = TestLeoResolvedAst::new(program_bytes);
-
-    resolver.expect_symbol_table_error();
-}
-
-#[test]
-fn test_duplicate_function() {
-    let program_bytes = include_bytes!("duplicate_function.leo");
-    let resolver = TestLeoResolvedAst::new(program_bytes);
-
-    resolver.expect_symbol_table_error();
-}
+pub mod functions;
+pub mod types;

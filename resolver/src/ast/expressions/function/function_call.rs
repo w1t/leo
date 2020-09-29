@@ -34,7 +34,7 @@ impl Expression {
 
         // Lookup the function type in the symbol table
         let function_type = table
-            .get_function(function_name)
+            .get_function(&function_name.name)
             .ok_or(ExpressionError::undefined_function(function_name.clone()))?;
 
         let type_ = function_type.output.type_.clone();

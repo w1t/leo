@@ -1,0 +1,1 @@
+function foo(f: u32, f: u32) {}

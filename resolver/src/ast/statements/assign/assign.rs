@@ -81,7 +81,7 @@ fn get_inner_assignee_type(
                 (Type::Array(next_type, _), AssigneeAccess::Array(_)) => *next_type.clone(),
                 (Type::Tuple(types), AssigneeAccess::Tuple(index)) => types[*index].clone(),
                 (Type::Circuit(identifier), AssigneeAccess::Member(member)) => {
-                    let circuit_type_option = table.get_circuit(&identifier);
+                    let circuit_type_option = table.get_circuit(&identifier.name);
 
                     let circuit_type = match circuit_type_option {
                         Some(circuit_type) => circuit_type,

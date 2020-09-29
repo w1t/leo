@@ -41,7 +41,7 @@ impl ResolvedNode for Function {
 
         // Throw an error if the function does not exist
         let type_ = table
-            .get_function(&identifier)
+            .get_function(&identifier.name)
             .ok_or(FunctionError::TypeError(TypeError::undefined_function(identifier)))?
             .clone();
 

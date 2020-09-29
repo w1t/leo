@@ -20,20 +20,22 @@ use leo_typed::{Identifier, Program};
 use leo_imports::ImportParser;
 use std::collections::HashMap;
 
+///
 /// A abstract data type that tracks the current bindings of identifier names in a Leo program
 /// A symbol table has access to all function and circuit names in its parent's symbol table
 /// A symbol table cannot access names in a child's symbol table
 /// Children cannot access names in another sibling's symbol table
+///
 #[derive(Clone)]
 pub struct SymbolTable {
     /// Maps variable name -> (location, type, attributes)
     variables: HashMap<String, Entry>,
 
     /// Maps circuit name -> (location, inputs, outputs)
-    circuits: HashMap<Identifier, CircuitType>,
+    circuits: HashMap<String, CircuitType>,
 
     ///Maps function name -> (location, variables, functions)
-    functions: HashMap<Identifier, FunctionType>,
+    functions: HashMap<String, FunctionType>,
 
     /// The parent of this symbol table
     parent: Option<Box<SymbolTable>>,
@@ -43,7 +45,9 @@ pub struct SymbolTable {
 }
 
 impl SymbolTable {
+    ///
     /// Creates a new symbol table with a given parent symbol table
+    ///
     pub fn new(parent: Option<Box<SymbolTable>>) -> Self {
         SymbolTable {
             variables: HashMap::new(),
@@ -54,28 +58,47 @@ impl SymbolTable {
         }
     }
 
+    ///
     /// Insert an identifier into the symbol table
+    ///
     pub fn insert_variable(&mut self, key: String, value: Entry) -> Option<Entry> {
         self.variables.insert(key, value)
     }
 
+    ///
     /// Insert a circuit definition into the symbol table
+    ///
     pub fn insert_circuit(&mut self, key: Identifier, value: CircuitType) -> Option<CircuitType> {
-        self.circuits.insert(key, value)
+        self.circuits.insert(key.name, value)
     }
 
+    ///
     /// Insert a function definition into the symbol table
+    ///
     pub fn insert_function(&mut self, key: Identifier, value: FunctionType) -> Option<FunctionType> {
-        self.functions.insert(key, value)
+        self.functions.insert(key.name, value)
     }
 
+    ///
     /// Get the current binding of an identifier
+    ///
     pub fn get_variable(&self, key: &String) -> Option<&Entry> {
-        self.variables.get(key)
+        match self.variables.get(key) {
+            Some(variable) => Some(variable),
+            None => {
+                // Look in parent symbol table
+                match &self.parent {
+                    Some(parent) => parent.get_variable(key),
+                    None => None,
+                }
+            }
+        }
     }
 
+    ///
     /// Get the current binding of a circuit type
-    pub fn get_circuit(&self, key: &Identifier) -> Option<&CircuitType> {
+    ///
+    pub fn get_circuit(&self, key: &String) -> Option<&CircuitType> {
         match self.circuits.get(key) {
             Some(circuit) => Some(circuit),
             None => {
@@ -88,8 +111,10 @@ impl SymbolTable {
         }
     }
 
+    ///
     /// Get the current binding of a function type
-    pub fn get_function(&self, key: &Identifier) -> Option<&FunctionType> {
+    ///
+    pub fn get_function(&self, key: &String) -> Option<&FunctionType> {
         match self.functions.get(key) {
             Some(circuit) => Some(circuit),
             None => {
@@ -102,19 +127,25 @@ impl SymbolTable {
         }
     }
 
+    ///
     /// Adds a child symbol table
     /// Children have access to identifiers in the current symbol table
+    ///
     pub fn push_child(&mut self, child: SymbolTable) {
         self.children.push(child)
     }
 
+    ///
     /// Inserts all imported identifiers for a given list of imported programs
     /// No type resolution performed at this step
+    ///
     pub fn insert_imports(&mut self, _imports: ImportParser) {}
 
+    ///
     /// Inserts all circuits and functions as variable types
     /// No type resolution performed at this step
     /// `let f = Foo { }; // f has type circuit Foo`
+    ///
     pub fn insert_program_variables(&mut self, program: &Program) -> Result<(), SymbolTableError> {
         // insert program circuits
         for (identifier, circuit) in program.circuits.iter() {
@@ -145,8 +176,10 @@ impl SymbolTable {
         Ok(())
     }
 
+    ///
     /// Inserts all circuits and functions as their respective types with additional information
     /// Type resolution for circuit and function signatures completed during this step
+    ///
     pub fn insert_definitions(&mut self, program: &Program) -> Result<(), SymbolTableError> {
         // insert program circuit types
         for (_, unresolved_circuit) in program.circuits.iter() {

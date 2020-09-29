@@ -33,7 +33,7 @@ impl Expression {
 
         // Lookup the circuit type in the symbol table
         let circuit_type = table
-            .get_circuit(circuit_name)
+            .get_circuit(&circuit_name.name)
             .ok_or(ExpressionError::undefined_circuit(circuit_name.clone()))?;
 
         // Resolve the circuit member as a circuit function

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
+pub mod resolver;
 pub mod symbol_table;
 
 use leo_ast::LeoAst;
@@ -23,14 +24,18 @@ use std::path::PathBuf;
 
 const TEST_PROGRAM_PATH: &str = "";
 
+///
 /// A helper struct to test a `LeoResolvedAst`
+///
 pub struct TestLeoResolvedAst {
     file_path: PathBuf,
     typed: LeoTypedAst,
 }
 
 impl TestLeoResolvedAst {
+    ///
     /// Returns a typed AST given a leo program
+    ///
     pub fn new(bytes: &[u8]) -> Self {
         let file_string = String::from_utf8_lossy(bytes);
         let file_path = PathBuf::from(TEST_PROGRAM_PATH);
@@ -44,15 +49,22 @@ impl TestLeoResolvedAst {
         Self { file_path, typed }
     }
 
+    ///
     /// Parse the typed AST into a `LeoResolvedAst`. Expect no errors during parsing.
+    ///
     pub fn expect_success(self) {
         // 3. Get resolved AST
-        let resolved = LeoResolvedAst::new(self.typed, self.file_path).is_ok();
+        let resolved = LeoResolvedAst::new(self.typed, self.file_path).unwrap_err();
 
-        assert!(resolved)
+        println!("{:?}", resolved)
+
+        // assert!(resolved)
     }
 
-    /// Parse the typed AST into a `LeoResolvedAst`. Expect an error involving identifiers in the symbol table.
+    ///
+    /// Parse the typed AST into a `LeoResolvedAst`.
+    /// Expect an error involving identifiers in the symbol table.
+    ///
     pub fn expect_symbol_table_error(self) {
         // 3. Get resolved AST
         let resolved = LeoResolvedAst::new(self.typed, self.file_path).unwrap_err();
@@ -60,6 +72,21 @@ impl TestLeoResolvedAst {
         match resolved {
             ResolverError::SymbolTableError(_) => {} // Ok
             error => panic!("Expected a symbol table error found `{}`", error),
+        }
+    }
+
+    ///
+    /// Parse the typed AST into a `LeoResolvedAst`. Expect an error
+    ///
+    pub fn expect_resolver_error(self) {
+        // 3. Get resolved AST
+        let resolved = LeoResolvedAst::new(self.typed, self.file_path).unwrap_err();
+
+        println!("{:?}", resolved);
+
+        match resolved {
+            ResolverError::ProgramError(_) => {} // Ok
+            error => panic!("Expected a resolver error found `{}`", error),
         }
     }
 }
