@@ -17,57 +17,92 @@
 use crate::{Program, ResolverError, SymbolTable};
 use leo_imports::ImportParser;
 use leo_typed::LeoTypedAst;
+
+use serde_json;
 use std::path::PathBuf;
 
-/// A resolved syntax tree is represented as a `Program` without implicitly typed values.
+/// A resolved abstract syntax tree without implicit types.
 #[derive(Debug, Eq, PartialEq)]
 pub struct LeoResolvedAst {
     pub resolved_ast: Program,
 }
 
 impl LeoResolvedAst {
-    /// Creates a new resolved syntax tree from a given typed syntax tree
+    ///
+    /// Creates a new `LeoResolvedAst` resolved syntax tree from a given `LeoTypedAst`
+    /// typed syntax tree and main file path.
+    ///
     pub fn new(ast: LeoTypedAst, path: PathBuf) -> Result<Self, ResolverError> {
-        // Get AST's for main program + imported programs
+        // Get program typed syntax tree representation.
         let program = ast.into_repr();
+
+        // Get imported program typed syntax tree representations.
         let _imported_programs = ImportParser::parse(&program)?;
 
-        //todo: load main function `input` register and state file types
+        // TODO (collinc97): Get input and state file typed syntax tree representations.
 
-        // Create a symbol table for main.leo
+        // Create a new symbol table to track of program variables, circuits, and functions by name.
         let mut symbol_table = SymbolTable::new(None);
 
-        // Pass 1: Insert circuits and functions as variable types
-        symbol_table.insert_program_variables(&program).map_err(|mut e| {
+        // Pass 1: Check for circuit and function name collisions.
+        symbol_table.pass_one(&program).map_err(|mut e| {
+            // Set the filepath for the error stacktrace.
+            e.set_path(path.clone());
+
+            e
+        })?;
+
+        // Pass 2: Check circuit and function definitions for unknown types.
+        symbol_table.pass_two(&program).map_err(|mut e| {
+            // Set the filepath for the error stacktrace.
+            e.set_path(path.clone());
+
+            e
+        })?;
+
+        // Pass 3: Check statements for type errors.
+        let resolved_ast = Program::resolve(&mut symbol_table, program).map_err(|mut e| {
+            // Set the filepath for the error stacktrace.
             e.set_path(path);
 
             e
         })?;
 
-        // Pass 2: Insert circuits and functions as definitions
-        symbol_table.insert_definitions(&program)?;
+        Ok(Self { resolved_ast })
+    }
 
-        // Pass 2: Perform semantic analysis on program
-        // At each AST node:
-        //    1. Resolve all child AST nodes
-        //    2. Resolve current AST node
-        let resolved_ast = Program::resolve(&mut symbol_table, program)?;
+    ///
+    /// Returns a reference to the inner resolved syntax tree representation.
+    ///
+    pub fn into_repr(self) -> Program {
+        self.resolved_ast
+    }
 
-        Ok(LeoResolvedAst { resolved_ast })
+    ///
+    /// Serializes the resolved syntax tree into a JSON string.
+    ///
+    pub fn to_json_string(&self) -> Result<String, serde_json::Error> {
+        Ok(serde_json::to_string_pretty(&self.resolved_ast)?)
+    }
+
+    ///
+    /// Deserializes the JSON string into a resolved syntax tree.
+    ///
+    pub fn from_json_string(json: &str) -> Result<Self, serde_json::Error> {
+        let resolved_ast: Program = serde_json::from_str(json)?;
+        Ok(Self { resolved_ast })
     }
 }
 
-///
-/// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types
-///
+/// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types.
 pub trait ResolvedNode {
-    /// The expected error type if the type resolution fails
+    /// The expected error type if the type resolution fails.
     type Error;
 
-    /// The `leo-typed` AST node that we are type checking
+    /// The `leo-typed` AST node that is being type checked.
     type UnresolvedNode;
 
-    /// Returns a resolved AST representation given an unresolved AST representation and symbol table
+    /// Returns a resolved AST representation given an unresolved AST representation and symbol table.
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error>
     where
         Self: std::marker::Sized;

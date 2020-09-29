@@ -17,7 +17,6 @@
 use crate::{
     check_tuple_type,
     Attribute,
-    Entry,
     Expression,
     ExpressionValue,
     ResolvedNode,
@@ -25,6 +24,7 @@ use crate::{
     StatementError,
     SymbolTable,
     Type,
+    VariableType,
 };
 use leo_typed::{Declare, Expression as UnresolvedExpression, Span, VariableName, Variables};
 
@@ -177,7 +177,7 @@ fn insert_defined_variable(
 
     // Insert variable into symbol table
     let key = variable.identifier.name.clone();
-    let value = Entry {
+    let value = VariableType {
         identifier: variable.identifier.clone(),
         type_: type_.clone(),
         attributes,

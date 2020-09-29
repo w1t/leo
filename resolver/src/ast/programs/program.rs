@@ -35,7 +35,13 @@ impl ResolvedNode for Program {
     type Error = ProgramError;
     type UnresolvedNode = TypedProgram;
 
-    /// Returns a resolved program AST given an unresolved program AST
+    ///
+    /// Returns a resolved program AST given an unresolved program AST.
+    ///
+    /// At each AST node:
+    ///    1. Resolve all child AST nodes.
+    ///    2. Resolve current AST node.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let mut circuits = HashMap::new();
         let mut functions = HashMap::new();

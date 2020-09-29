@@ -19,15 +19,15 @@ use leo_typed::{Circuit, Function, Identifier};
 use crate::FunctionInputVariableType;
 use std::fmt;
 
-/// A symbol table entry stores the type and attribute information for an identifier
+/// Stores the type and attribute information for a variable.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct Entry {
+pub struct VariableType {
     pub identifier: Identifier,
     pub type_: Type,
     pub attributes: Vec<Attribute>,
 }
 
-impl Entry {
+impl VariableType {
     /// Returns the type of the variable
     pub fn type_(&self) -> &Type {
         &self.type_
@@ -44,11 +44,11 @@ impl Entry {
     }
 }
 
-impl From<Circuit> for Entry {
+impl From<Circuit> for VariableType {
     fn from(value: Circuit) -> Self {
         let identifier = value.circuit_name;
 
-        Entry {
+        VariableType {
             identifier: identifier.clone(),
             type_: Type::Circuit(identifier),
             attributes: vec![],
@@ -56,11 +56,11 @@ impl From<Circuit> for Entry {
     }
 }
 
-impl From<Function> for Entry {
+impl From<Function> for VariableType {
     fn from(value: Function) -> Self {
         let identifier = value.identifier;
 
-        Entry {
+        VariableType {
             identifier: identifier.clone(),
             type_: Type::Function(identifier.clone()),
             attributes: vec![],
@@ -68,9 +68,9 @@ impl From<Function> for Entry {
     }
 }
 
-impl From<FunctionInputVariableType> for Entry {
+impl From<FunctionInputVariableType> for VariableType {
     fn from(value: FunctionInputVariableType) -> Self {
-        Entry {
+        VariableType {
             identifier: value.identifier,
             type_: value.type_,
             attributes: value.attributes,
@@ -78,7 +78,7 @@ impl From<FunctionInputVariableType> for Entry {
     }
 }
 
-impl fmt::Display for Entry {
+impl fmt::Display for VariableType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.identifier)
     }
