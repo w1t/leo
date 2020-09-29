@@ -42,7 +42,7 @@ pub struct Conditional {
 
 impl Conditional {
     ///
-    /// Resolves a conditional statement
+    /// Resolves a conditional statement.
     ///
     pub(crate) fn from_unresolved(
         table: &mut SymbolTable,
@@ -50,16 +50,17 @@ impl Conditional {
         conditional: UnresolvedConditional,
         span: Span,
     ) -> Result<Self, StatementError> {
-        // TODO: Create child symbol table and add variables from parent
+        // Create child symbol table.
+        let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
 
-        // Resolve the condition to a boolean
+        // Resolve the condition to a boolean.
         let type_boolean = Some(Type::Boolean);
-        let condition_resolved = Expression::resolve(table, (type_boolean, conditional.condition))?;
+        let condition_resolved = Expression::resolve(&mut child_table, (type_boolean, conditional.condition))?;
 
-        // Resolve all statements
-        let statements_resolved = resolve_statements(table, return_type.clone(), conditional.statements)?;
+        // Resolve all statements.
+        let statements_resolved = resolve_statements(&mut child_table, return_type.clone(), conditional.statements)?;
 
-        // Check for an `else if` or `else` clause
+        // Check for an `else if` or `else` clause.
         let nested_or_end = match conditional.next {
             Some(nested_or_end) => nested_or_end,
             None => {
@@ -72,7 +73,7 @@ impl Conditional {
             }
         };
 
-        // Evaluate the `else if` or `else` clause
+        // Evaluate the `else if` or `else` clause.
         let next_resolved = match nested_or_end {
             UnresolvedNestedOrEnd::Nested(conditional) => {
                 // Type check the `else if` clause.
@@ -82,8 +83,11 @@ impl Conditional {
                 ConditionalNestedOrEndStatement::Nested(Box::new(conditional_resolved))
             }
             UnresolvedNestedOrEnd::End(statements) => {
+                // Create child symbol table.
+                let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
+
                 // Type check the `else` clause.
-                let statements_resolved = resolve_statements(table, return_type, statements)?;
+                let statements_resolved = resolve_statements(&mut child_table, return_type, statements)?;
 
                 ConditionalNestedOrEndStatement::End(statements_resolved)
             }
@@ -98,7 +102,7 @@ impl Conditional {
     }
 }
 
-/// Resolve an array of statements
+/// Resolve an array of statements.
 fn resolve_statements(
     table: &mut SymbolTable,
     return_type: FunctionOutputType,
@@ -111,7 +115,7 @@ fn resolve_statements(
 }
 
 impl Statement {
-    /// Resolves a conditional statement
+    /// Resolves a conditional statement.
     pub(crate) fn conditional(
         table: &mut SymbolTable,
         return_type: FunctionOutputType,

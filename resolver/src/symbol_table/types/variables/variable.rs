@@ -13,13 +13,13 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::ast::{Attribute, Type};
+use crate::{Attribute, Type};
 use leo_typed::{Circuit, Function, Identifier};
 
 use crate::FunctionInputVariableType;
 use std::fmt;
 
-/// Stores the type and attribute information for a variable.
+/// Stores the identifier, type and attribute information for a variable.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct VariableType {
     pub identifier: Identifier,
@@ -28,19 +28,18 @@ pub struct VariableType {
 }
 
 impl VariableType {
-    /// Returns the type of the variable
+    ///
+    /// Returns the type of the variable.
+    ///
     pub fn type_(&self) -> &Type {
         &self.type_
     }
 
-    /// Returns `true` if this variable's value can be modified
+    ///
+    /// Returns `true` if this variable's value can be modified.
+    ///
     pub fn is_mutable(&self) -> bool {
         self.attributes.contains(&Attribute::Mutable)
-    }
-
-    /// Returns `true` if this variable's value is static
-    pub fn is_static(&self) -> bool {
-        self.attributes.contains(&Attribute::Static)
     }
 }
 

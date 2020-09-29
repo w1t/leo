@@ -16,3 +16,6 @@
 
 pub mod symbol_table;
 pub use self::symbol_table::*;
+
+pub mod types;
+pub use self::types::*;

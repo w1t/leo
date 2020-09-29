@@ -50,7 +50,7 @@ impl ExpressionError {
     }
 
     ///
-    /// Attempted to access a circuit member that is static using double colon syntax
+    /// Attempted to access a circuit member that is static using double colon syntax.
     ///
     pub fn invalid_member_access(member: String, span: Span) -> Self {
         let message = format!("Circuit member `{}` must be accessed using `::` syntax.", member);
@@ -59,7 +59,7 @@ impl ExpressionError {
     }
 
     ///
-    /// Attempted to access a circuit member that is static using dot syntax
+    /// Attempted to access a circuit member that is static using dot syntax.
     ///
     pub fn invalid_static_member_access(member: String, span: Span) -> Self {
         let message = format!("Static member `{}` must be accessed using `.` syntax.", member);
@@ -71,7 +71,7 @@ impl ExpressionError {
     /// Attempted to access a tuple index that does not exist.
     ///
     pub fn invalid_index_tuple(index: usize, max: usize, span: Span) -> Self {
-        let message = format!("Attempted to access index {} of tuple with length {}", index, max);
+        let message = format!("Attempted to access index {} of tuple with length {}.", index, max);
 
         Self::new_from_span(message, span)
     }
@@ -81,7 +81,7 @@ impl ExpressionError {
     ///
     pub fn invalid_length_array(expected: usize, actual: usize, span: Span) -> Self {
         let message = format!(
-            "Expected array with length {}, found array with length {}",
+            "Expected array with length {}, found array with length {}.",
             expected, actual
         );
 
@@ -93,7 +93,7 @@ impl ExpressionError {
     ///
     pub fn invalid_length_circuit_members(expected: usize, actual: usize, span: Span) -> Self {
         let message = format!(
-            "Expected circuit with {} members, found circuit with {} members",
+            "Expected circuit with {} members, found circuit with {} members.",
             expected, actual
         );
 
@@ -101,11 +101,11 @@ impl ExpressionError {
     }
 
     ///
-    /// Found a circuit with an incorrect number of members
+    /// Found a circuit with an incorrect number of members.
     ///
     pub fn invalid_length_function_inputs(expected: usize, actual: usize, span: Span) -> Self {
         let message = format!(
-            "Function expected {} inputs, found function with {} members",
+            "Function expected {} inputs, found function with {} members.",
             expected, actual
         );
 
@@ -117,7 +117,7 @@ impl ExpressionError {
     ///
     pub fn invalid_length_tuple(expected: usize, actual: usize, span: Span) -> Self {
         let message = format!(
-            "Expected tuple with length {}, found tuple with length {}",
+            "Expected tuple with length {}, found tuple with length {}.",
             expected, actual
         );
 
@@ -128,7 +128,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown variable name.
     ///
     pub fn undefined_identifier(identifier: Identifier) -> Self {
-        let message = format!("Cannot find value `{}` in this scope", identifier.name);
+        let message = format!("Cannot find variable `{}` in this scope.", identifier.name);
 
         Self::new_from_span(message, identifier.span)
     }
@@ -137,7 +137,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown circuit name.
     ///
     pub fn undefined_circuit(identifier: Identifier) -> Self {
-        let message = format!("Cannot find circuit `{}` in this scope", identifier.name);
+        let message = format!("Cannot find circuit `{}` in this scope.", identifier.name);
 
         Self::new_from_span(message, identifier.span)
     }
@@ -146,7 +146,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown circuit variable name.
     ///
     pub fn undefined_circuit_variable(identifier: Identifier) -> Self {
-        let message = format!("Circuit has no member variable named `{}`", identifier.name);
+        let message = format!("Circuit has no member variable named `{}`.", identifier.name);
 
         Self::new_from_span(message, identifier.span)
     }
@@ -155,7 +155,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown circuit function name.
     ///
     pub fn undefined_circuit_function(identifier: Identifier, span: Span) -> Self {
-        let message = format!("Circuit has no member function named `{}`", identifier.name);
+        let message = format!("Circuit has no member function named `{}`.", identifier.name);
 
         Self::new_from_span(message, span)
     }
@@ -164,7 +164,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown circuit function static name.
     ///
     pub fn undefined_circuit_function_static(identifier: Identifier, span: Span) -> Self {
-        let message = format!("Circuit has no static member function named `{}`", identifier.name);
+        let message = format!("Circuit has no static member function named `{}`.", identifier.name);
 
         Self::new_from_span(message, span)
     }
@@ -173,7 +173,7 @@ impl ExpressionError {
     /// Attempted to lookup an unknown circuit name.
     ///
     pub fn undefined_function(identifier: Identifier) -> Self {
-        let message = format!("Cannot find function `{}` in this scope", identifier.name);
+        let message = format!("Cannot find function `{}` in this scope.", identifier.name);
 
         Self::new_from_span(message, identifier.span)
     }
