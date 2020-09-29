@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ResolvedNode, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ResolvedNode, SymbolTable, Type};
 use leo_typed::{CircuitVariableDefinition as UnresolvedCircuitVariableDefinition, Identifier};
 
 use serde::{Deserialize, Serialize};
@@ -27,9 +27,12 @@ pub struct CircuitVariableDefinition {
 }
 
 impl ResolvedNode for CircuitVariableDefinition {
-    type Error = ();
+    type Error = ExpressionError;
     type UnresolvedNode = (Option<Type>, UnresolvedCircuitVariableDefinition);
 
+    ///
+    /// Type check a circuit variable in an inline circuit expression
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let expected_type = unresolved.0;
         let circuit_variable = unresolved.1;
@@ -37,7 +40,7 @@ impl ResolvedNode for CircuitVariableDefinition {
         // Resolve circuit variable expression with expected type
         Ok(CircuitVariableDefinition {
             identifier: circuit_variable.identifier,
-            expression: Expression::resolve(table, (expected_type, circuit_variable.expression)).unwrap(),
+            expression: Expression::resolve(table, (expected_type, circuit_variable.expression))?,
         })
     }
 }

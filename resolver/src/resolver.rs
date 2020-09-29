@@ -51,13 +51,15 @@ impl LeoResolvedAst {
         // At each AST node:
         //    1. Resolve all child AST nodes
         //    2. Resolve current AST node
-        let resolved_ast = Program::resolve(&mut symbol_table, program).unwrap();
+        let resolved_ast = Program::resolve(&mut symbol_table, program)?;
 
         Ok(LeoResolvedAst { resolved_ast })
     }
 }
 
+///
 /// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types
+///
 pub trait ResolvedNode {
     /// The expected error type if the type resolution fails
     type Error;

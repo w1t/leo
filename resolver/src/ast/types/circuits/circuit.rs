@@ -27,6 +27,8 @@ use leo_typed::{Circuit, CircuitMember, Identifier};
 
 use serde::{Deserialize, Serialize};
 
+/// Stores circuit definition details
+/// This type should be added to the circuit symbol table for a type checked program
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitType {
     /// The name of the circuit definition
@@ -43,6 +45,7 @@ impl ResolvedNode for CircuitType {
     type Error = TypeError;
     type UnresolvedNode = Circuit;
 
+    /// Type check a circuit definition
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let circuit_identifier = unresolved.circuit_name;
         let mut variables = vec![];
@@ -103,7 +106,7 @@ impl CircuitType {
     }
 
     /// Resolves the type of a circuit variable or the return type of a circuit function
-    pub fn member_type(&self, identifier: &Identifier) -> Result<&Type, ()> {
+    pub fn member_type(&self, identifier: &Identifier) -> Result<&Type, TypeError> {
         let matched_variable = self
             .variables
             .iter()
@@ -118,7 +121,7 @@ impl CircuitType {
                     .find(|function| function.function.identifier.eq(identifier));
                 match matched_function {
                     Some(function) => Ok(&function.function.output.type_),
-                    None => Err(()),
+                    None => Err(TypeError::undefined_circuit_member(identifier.clone())),
                 }
             }
         }

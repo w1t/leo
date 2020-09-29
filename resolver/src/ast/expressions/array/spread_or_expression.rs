@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ResolvedNode, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ResolvedNode, SymbolTable, Type};
 use leo_typed::SpreadOrExpression as UnresolvedSpreadOrExpression;
 
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ impl SpreadOrExpression {
 }
 
 impl ResolvedNode for SpreadOrExpression {
-    type Error = ();
+    type Error = ExpressionError;
     type UnresolvedNode = (Option<Type>, UnresolvedSpreadOrExpression);
 
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {

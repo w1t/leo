@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Function, ResolvedNode, SymbolTable};
+use crate::{Function, FunctionError, ResolvedNode, SymbolTable};
 use leo_typed::{Identifier, TestFunction as UnresolvedTestFunction};
 
 use serde::{Deserialize, Serialize};
@@ -29,7 +29,7 @@ pub struct TestFunction {
 }
 
 impl ResolvedNode for TestFunction {
-    type Error = ();
+    type Error = FunctionError;
     type UnresolvedNode = UnresolvedTestFunction;
 
     /// Return a type checked `TestFunction` given an unresolved test function

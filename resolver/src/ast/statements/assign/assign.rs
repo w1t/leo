@@ -14,26 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ResolvedNode, Statement, SymbolTable, Type};
+use crate::{Expression, ResolvedNode, Statement, StatementError, SymbolTable, Type};
 use leo_typed::{Assignee, AssigneeAccess, Expression as UnresolvedExpression, Span};
 
 use serde::{Deserialize, Serialize};
-
-// /// The variable being assigned to a value
-// #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-// pub enum Assignee {
-//     /// variable name
-//     Identifier(Identifier),
-//
-//     /// (array name, array index)
-//     Array(Box<Assignee>, RangeOrExpression),
-//
-//     /// (tuple name, tuple index)
-//     Tuple(Box<Assignee>, usize),
-//
-//     /// (circuit name, circuit field name)
-//     CircuitField(Box<Assignee>, Identifier),
-// }
 
 /// A statement that assigns `Assignee = Expression;`.
 /// Checks that the expression resolves to the assignee's type
@@ -45,27 +29,31 @@ pub struct Assign {
 }
 
 impl Statement {
+    ///
     /// Resolves an assign statement
+    ///
     pub(crate) fn assign(
         table: &mut SymbolTable,
         assignee: Assignee,
         expression: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // Lookup variable in symbol table
         let key = &assignee.identifier.name;
-        let variable = table.get_variable(key).unwrap();
+        let variable = table
+            .get_variable(key)
+            .ok_or(StatementError::undefined_variable(key.clone(), span.clone()))?;
 
         // Throw an error if this variable is not mutable
         if !variable.is_mutable() {
-            unimplemented!("ERROR: Attempted to modify an immutable variable")
+            return Err(StatementError::immutable_assign(variable.identifier.name.clone(), span));
         }
 
         // Get inner assignee type
-        let type_ = get_inner_assignee_type(table, variable.type_.clone(), assignee.accesses.clone());
+        let type_ = get_inner_assignee_type(table, variable.type_.clone(), assignee.accesses.clone(), span.clone())?;
 
         // Resolve the expression based on the assignee type
-        let expression_resolved = Expression::resolve(table, (Some(type_), expression)).unwrap();
+        let expression_resolved = Expression::resolve(table, (Some(type_), expression))?;
 
         Ok(Statement::Assign(Assign {
             assignee,
@@ -75,25 +63,36 @@ impl Statement {
     }
 }
 
-fn get_inner_assignee_type(table: &SymbolTable, type_: Type, accesses: Vec<AssigneeAccess>) -> Type {
+///
+/// Accesses the inner type of an assignee such as an array, tuple, or circuit member.
+/// Returns an error for invalid accesses.
+///
+fn get_inner_assignee_type(
+    table: &SymbolTable,
+    type_: Type,
+    accesses: Vec<AssigneeAccess>,
+    span: Span,
+) -> Result<Type, StatementError> {
     match accesses.first() {
-        None => type_,
+        None => Ok(type_),
         Some(access) => {
             // Check that we are correctly accessing the type
             let next_type = match (&type_, access) {
                 (Type::Array(next_type, _), AssigneeAccess::Array(_)) => *next_type.clone(),
                 (Type::Tuple(types), AssigneeAccess::Tuple(index)) => types[*index].clone(),
-                (Type::Function(identifier), AssigneeAccess::Member(_)) => {
-                    table.get_function(&identifier).unwrap().output.type_.clone()
-                }
                 (Type::Circuit(identifier), AssigneeAccess::Member(member)) => {
-                    let circuit_type = table.get_circuit(&identifier).unwrap();
-                    circuit_type.member_type(member).unwrap().clone()
+                    let circuit_type_option = table.get_circuit(&identifier);
+
+                    let circuit_type = match circuit_type_option {
+                        Some(circuit_type) => circuit_type,
+                        None => return Err(StatementError::undefined_circuit(identifier.clone())),
+                    };
+                    circuit_type.member_type(member)?.clone()
                 }
-                _ => unimplemented!("ERROR: illegal access"),
+                (type_, _) => return Err(StatementError::invalid_assign(type_, span)),
             };
 
-            return get_inner_assignee_type(table, next_type, accesses[1..].to_vec());
+            return get_inner_assignee_type(table, next_type, accesses[1..].to_vec(), span);
         }
     }
 }

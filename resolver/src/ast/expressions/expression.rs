@@ -14,11 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{ExpressionValue, ResolvedNode, SymbolTable, Type};
+use crate::{ExpressionError, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 use serde::{Deserialize, Serialize};
 
+/// Stores a type-checked expression
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Expression {
     /// The type this expression evaluates to
@@ -39,16 +40,19 @@ impl Expression {
     }
 
     /// Returns `Ok` if this expression resolves to an integer type
-    pub fn check_type_integer(&self) -> Result<(), ()> {
-        self.type_.check_type_integer(self.value.span().clone())
+    pub fn check_type_integer(&self) -> Result<(), ExpressionError> {
+        self.type_.check_type_integer(self.value.span().clone())?;
+
+        Ok(())
     }
 }
 
 impl ResolvedNode for Expression {
-    type Error = ();
+    type Error = ExpressionError;
     /// (expected type, unresolved expression)
     type UnresolvedNode = (Option<Type>, UnresolvedExpression);
 
+    /// Type check an expression inside a program AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let expected_type = unresolved.0;
         let expression = unresolved.1;
@@ -119,10 +123,10 @@ impl ResolvedNode for Expression {
             UnresolvedExpression::FunctionCall(function, inputs, span) => {
                 Self::function_call(table, expected_type, function, inputs, span)
             }
-            // UnresolvedExpression::CoreFunctionCall(name, inputs, output, span) => {
-            //     Self::core_function_call(table, expected_type, function, inputs, span)
-            // }
-            _ => return Err(()),
+            UnresolvedExpression::CoreFunctionCall(_name, _inputs, _output, _span) => {
+                unimplemented!("core function calls not type checked")
+                // Self::core_function_call(table, expected_type, function, inputs, span)
+            }
         }
     }
 }

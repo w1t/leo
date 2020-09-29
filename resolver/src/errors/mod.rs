@@ -14,8 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
+pub mod circuit;
+pub use self::circuit::*;
+
+pub mod expression;
+pub use self::expression::*;
+
+pub mod function;
+pub use self::function::*;
+
+pub mod program;
+pub use self::program::*;
+
 pub mod resolver;
 pub use self::resolver::*;
+
+pub mod statement;
+pub use self::statement::*;
 
 pub mod symbol_table;
 pub use self::symbol_table::*;

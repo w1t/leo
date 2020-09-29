@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Expression {
@@ -23,15 +23,15 @@ impl Expression {
         expected_type: Option<Type>,
         expression: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         let type_ = Type::Boolean;
 
         // Check the expected type if given
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         // Resolve lhs and rhs expressions to boolean type
         let boolean_type = Some(type_.clone());
-        let expression_resolved = Self::resolve(table, (boolean_type, expression)).unwrap();
+        let expression_resolved = Self::resolve(table, (boolean_type, expression))?;
 
         Ok(Expression {
             type_,

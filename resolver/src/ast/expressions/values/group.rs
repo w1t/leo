@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, Type};
 use leo_typed::GroupValue;
 
 impl Expression {
     /// Resolve an group expression
-    pub(crate) fn group(expected_type: Option<Type>, group_value: GroupValue) -> Result<Self, ()> {
+    pub(crate) fn group(expected_type: Option<Type>, group_value: GroupValue) -> Result<Self, ExpressionError> {
         let type_ = Type::Group;
         let span = group_value.span().clone();
 
         // Check the expected type if given
-        Type::check_type(&expected_type, &type_, span).unwrap();
+        Type::check_type(&expected_type, &type_, span)?;
 
         Ok(Expression {
             type_,

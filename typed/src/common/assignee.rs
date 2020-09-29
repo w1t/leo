@@ -63,21 +63,6 @@ impl<'ast> From<AstAssignee<'ast>> for Assignee {
                 .collect::<Vec<_>>(),
             span: Span::from(assignee.span),
         }
-        // // We start with the id, and we fold the array of accesses by wrapping the current value
-        // assignee
-        //     .accesses
-        //     .into_iter()
-        //     .fold(variable, |acc, access| match access {
-        //         AstAssigneeAccess::Array(array) => {
-        //             Assignee::Array(Box::new(acc), RangeOrExpression::from(array.expression))
-        //         }
-        //         AstAssigneeAccess::Tuple(tuple) => {
-        //             Assignee::Tuple(Box::new(acc), Expression::get_count_from_ast(tuple.number))
-        //         }
-        //         AstAssigneeAccess::Member(circuit_variable) => {
-        //             Assignee::CircuitField(Box::new(acc), Identifier::from(circuit_variable.identifier))
-        //         }
-        //     })
     }
 }
 

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ResolvedNode, Statement, SymbolTable, Type};
+use crate::{Expression, ResolvedNode, Statement, StatementError, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Statement {
@@ -24,8 +24,8 @@ impl Statement {
         expected_type: Type,
         expression: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
-        let expression = Expression::resolve(table, (Some(expected_type), expression)).unwrap();
+    ) -> Result<Self, StatementError> {
+        let expression = Expression::resolve(table, (Some(expected_type), expression))?;
 
         Ok(Statement::Return(expression, span))
     }

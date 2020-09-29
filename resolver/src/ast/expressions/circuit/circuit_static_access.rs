@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Attribute, Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
+use crate::{Attribute, Expression, ExpressionError, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Identifier, Span};
 
 impl Expression {
@@ -25,14 +25,16 @@ impl Expression {
         circuit: Box<UnresolvedExpression>,
         member: Identifier,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Lookup the circuit in the symbol table.
         // We do not know the exact circuit type from this context so `expected_type = None`.
-        let circuit_resolved = Expression::resolve(table, (None, *circuit)).unwrap();
-        let circuit_name = circuit_resolved.type_().get_type_circuit(span.clone()).unwrap();
+        let circuit_resolved = Expression::resolve(table, (None, *circuit))?;
+        let circuit_name = circuit_resolved.type_().get_type_circuit(span.clone())?;
 
         // Lookup the circuit type in the symbol table
-        let circuit_type = table.get_circuit(circuit_name).unwrap();
+        let circuit_type = table
+            .get_circuit(circuit_name)
+            .ok_or(ExpressionError::undefined_circuit(circuit_name.clone()))?;
 
         // Resolve the circuit member as a circuit function
         let matched_function = circuit_type
@@ -46,14 +48,14 @@ impl Expression {
                 if function.attributes.contains(&Attribute::Static) {
                     function.function.output.type_.clone()
                 } else {
-                    unimplemented!("ERROR: circuit member function is static")
+                    return Err(ExpressionError::invalid_member_access(member.name, span));
                 }
             }
-            None => unimplemented!("ERROR: static circuit member not found"),
+            None => return Err(ExpressionError::undefined_circuit_function_static(member, span)),
         };
 
         // Check type of static circuit function output
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         Ok(Expression {
             type_,

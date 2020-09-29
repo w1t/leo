@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Expression {
@@ -25,19 +25,27 @@ impl Expression {
         tuple: Box<UnresolvedExpression>,
         index: usize,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Lookup the tuple in the symbol table.
         // We do not know the length from this context so `expected_type = None`.
-        let tuple_resolved = Expression::resolve(table, (None, *tuple)).unwrap();
+        let tuple_resolved = Expression::resolve(table, (None, *tuple))?;
 
         // Resolve the tuple index type
-        let type_tuple = tuple_resolved.type_().get_type_tuple(span.clone()).unwrap();
+        let type_tuple = tuple_resolved.type_().get_type_tuple(span.clone())?;
 
-        //TODO: return a tuple out of bounds error here
+        // Throw a tuple out of bounds error for an index that does not exist
+        if index > type_tuple.len() {
+            return Err(ExpressionError::invalid_index_tuple(
+                index,
+                type_tuple.len(),
+                span.clone(),
+            ));
+        }
+
         let type_ = type_tuple[index].clone();
 
         // Check that expected type matches
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         Ok(Expression {
             type_,

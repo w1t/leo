@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 use crate::{ResolvedNode, SymbolTable, TypeError};
-
 use leo_typed::{Identifier, IntegerType, Span, Type as UnresolvedType};
+
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// The type of an identifier in a Leo program. Cannot be implicit.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -115,59 +116,58 @@ impl Type {
         })
     }
 
-    /// Returns `Ok` if the given expected type is `Some` && expected type == actual type
-    pub fn check_type(expected_option: &Option<Self>, actual: &Type, _span: Span) -> Result<(), ()> {
+    /// Returns `Ok` if the given expected type is `Some` and  expected type == actual type
+    pub fn check_type(expected_option: &Option<Self>, actual: &Type, span: Span) -> Result<(), TypeError> {
         if let Some(expected) = expected_option {
-            if expected.ne(&actual) {
-                // TODO: throw mismatched type error
-                unimplemented!("ERROR: mismatched types")
+            if expected.ne(actual) {
+                return Err(TypeError::mismatched_types(expected, actual, span));
             }
         }
         Ok(())
     }
 
     /// Returns `Ok` if self is an expected integer type `Type::IntegerType`
-    pub fn check_type_integer(&self, _span: Span) -> Result<(), ()> {
+    pub fn check_type_integer(&self, span: Span) -> Result<(), TypeError> {
         match self {
             Type::IntegerType(_) => Ok(()),
-            // TODO: throw mismatched type error
-            _ => unimplemented!("ERROR: mismatched types, expected integer"),
+            // Throw mismatched type error
+            type_ => Err(TypeError::invalid_integer(type_, span)),
         }
     }
 
     /// Returns array element type and dimensions if self is an expected array type `Type::Array`
-    pub fn get_type_array(&self, _span: Span) -> Result<(&Type, &Vec<usize>), ()> {
+    pub fn get_type_array(&self, span: Span) -> Result<(&Type, &Vec<usize>), TypeError> {
         match self {
             Type::Array(element_type, dimensions) => Ok((element_type, dimensions)),
-            // TODO: throw mismatched type error
-            _ => unimplemented!("ERROR: mismatched types, expected array"),
+            // Throw mismatched type error
+            type_ => Err(TypeError::invalid_array(type_, span)),
         }
     }
 
     /// Returns tuple element types if self is an expected tuple type `Type::Tuple`
-    pub fn get_type_tuple(&self, _span: Span) -> Result<&Vec<Type>, ()> {
+    pub fn get_type_tuple(&self, span: Span) -> Result<&Vec<Type>, TypeError> {
         match self {
             Type::Tuple(types) => Ok(types),
-            // TODO: throw mismatched type error
-            _ => unimplemented!("ERROR: mismatched types, expected tuple"),
+            // Throw mismatched type error
+            type_ => Err(TypeError::invalid_tuple(type_, span)),
         }
     }
 
     /// Returns circuit identifier if self is an expected circuit type `Type::Circuit`
-    pub fn get_type_circuit(&self, _span: Span) -> Result<&Identifier, ()> {
+    pub fn get_type_circuit(&self, span: Span) -> Result<&Identifier, TypeError> {
         match self {
             Type::Circuit(identifier) => Ok(identifier),
-            // TODO: throw mismatched type error
-            _ => unimplemented!("ERROR: mismatched types, expected circuit"),
+            // Throw mismatched type error
+            type_ => Err(TypeError::invalid_circuit(type_, span)),
         }
     }
 
     /// Returns function identifier if self is an expected function type `Type::Function`
-    pub fn get_type_function(&self, _span: Span) -> Result<&Identifier, ()> {
+    pub fn get_type_function(&self, span: Span) -> Result<&Identifier, TypeError> {
         match self {
             Type::Function(identifier) => Ok(identifier),
-            // TODO: throw mismatched type error
-            _ => unimplemented!("ERROR: mismatched types, expected function"),
+            // Throw mismatched type error
+            type_ => Err(TypeError::invalid_function(type_, span)),
         }
     }
 
@@ -178,4 +178,34 @@ impl Type {
     //         Type::Tuple(types) => unimplemented!("")
     //     }
     // }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            Type::Address => write!(f, "address"),
+            Type::Boolean => write!(f, "bool"),
+            Type::Field => write!(f, "field"),
+            Type::Group => write!(f, "group"),
+            Type::IntegerType(integer_type) => write!(f, "{}", integer_type),
+
+            Type::Array(type_, dimensions) => {
+                let dimensions_string = dimensions
+                    .iter()
+                    .map(|dimension| format!("{}", dimension))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+
+                write!(f, "[{}; ({})]", *type_, dimensions_string)
+            }
+            Type::Tuple(tuple) => {
+                let tuple_string = tuple.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(", ");
+
+                write!(f, "({})", tuple_string)
+            }
+
+            Type::Circuit(identifier) => write!(f, "circuit {}", identifier),
+            Type::Function(identifier) => write!(f, "function {}", identifier),
+        }
+    }
 }

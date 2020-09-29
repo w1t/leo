@@ -16,9 +16,3 @@
 
 pub mod circuit;
 pub use self::circuit::*;
-
-// pub mod circuit_function;
-// pub use self::circuit_function::*;
-//
-// pub mod circuit_variable;
-// pub use self::circuit_variable::*;

@@ -19,9 +19,3 @@ pub use self::function::*;
 
 pub mod test_function;
 pub use self::test_function::*;
-
-// pub mod function_input;
-// pub use self::function_input::*;
-//
-// pub mod function_output;
-// pub use self::function_output::*;

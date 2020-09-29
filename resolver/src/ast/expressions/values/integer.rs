@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, Type};
 use leo_typed::{IntegerType, Span};
 
 impl Expression {
@@ -24,11 +24,11 @@ impl Expression {
         integer_type: IntegerType,
         integer_string: String,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         let type_ = Type::IntegerType(integer_type);
 
         // Check the expected type if given
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         Ok(Expression {
             type_,

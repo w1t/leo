@@ -14,35 +14,48 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{FunctionType, ResolvedNode, Statement, SymbolTable};
+use crate::{FunctionError, FunctionType, ResolvedNode, Statement, SymbolTable, TypeError};
 use leo_typed::Function as UnresolvedFunction;
 
 use serde::{Deserialize, Serialize};
 
+/// Stores function definition and function statements
+/// This struct should be part of the type checked AST
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Function {
     /// The name of the function definition
     pub type_: FunctionType,
+
     /// The function statements
     pub statements: Vec<Statement>,
 }
 
 impl ResolvedNode for Function {
-    type Error = ();
+    type Error = FunctionError;
     type UnresolvedNode = UnresolvedFunction;
 
+    /// Type check a function inside a program AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
+        // Lookup function identifier in symbol table
         let identifier = unresolved.identifier;
-        // TODO: Throw an unknown function error
-        let type_ = table.get_function(&identifier).unwrap().clone();
+
+        // Throw an error if the function does not exist
+        let type_ = table
+            .get_function(&identifier)
+            .ok_or(FunctionError::TypeError(TypeError::undefined_function(identifier)))?
+            .clone();
 
         // // Create function context
         // let mut child_table = SymbolTable::new(Some(Box::new(table.clone())));
 
-        // Insert function inputs into symbol table
+        // Insert function input types into the symbol table
         for input in type_.inputs.clone() {
-            // TODO: throw duplicate function input error
-            input.insert(table);
+            let exists = input.insert(table);
+
+            // Throw an error if two function inputs have been defined with the same name
+            if exists.is_some() {
+                return Err(FunctionError::duplicate_input(input.identifier().clone()));
+            }
         }
 
         // Pass expected function output to resolved statements
@@ -51,7 +64,7 @@ impl ResolvedNode for Function {
 
         // Resolve all function statements
         for (_i, statement) in unresolved.statements.into_iter().enumerate() {
-            let statement = Statement::resolve(table, (output.clone(), statement)).unwrap();
+            let statement = Statement::resolve(table, (output.clone(), statement))?;
 
             statements.push(statement);
         }

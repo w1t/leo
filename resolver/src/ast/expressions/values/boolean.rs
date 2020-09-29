@@ -14,16 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, Type};
 use leo_typed::Span;
 
 impl Expression {
     /// Resolve a boolean expression
-    pub(crate) fn boolean(expected_type: Option<Type>, boolean_string: String, span: Span) -> Result<Self, ()> {
+    pub(crate) fn boolean(
+        expected_type: Option<Type>,
+        boolean_string: String,
+        span: Span,
+    ) -> Result<Self, ExpressionError> {
         let type_ = Type::Boolean;
 
         // Check the expected type if given
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         Ok(Expression {
             type_,

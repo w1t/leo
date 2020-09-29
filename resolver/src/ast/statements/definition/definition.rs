@@ -22,6 +22,7 @@ use crate::{
     ExpressionValue,
     ResolvedNode,
     Statement,
+    StatementError,
     SymbolTable,
     Type,
 };
@@ -55,13 +56,13 @@ impl DefinitionVariables {
         expected_type: Option<Type>,
         expression: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // Resolve expression with given expected type
-        let expression_resolved = Expression::resolve(table, (expected_type, expression)).unwrap();
+        let expression_resolved = Expression::resolve(table, (expected_type, expression))?;
         let type_ = expression_resolved.type_();
 
         // Insert variable into symbol table
-        insert_defined_variable(table, &variable, type_, span.clone()).unwrap();
+        insert_defined_variable(table, &variable, type_, span.clone())?;
 
         Ok(DefinitionVariables::Single(variable, expression_resolved))
     }
@@ -73,13 +74,13 @@ impl DefinitionVariables {
         expected_type: Option<Type>,
         expressions: Vec<UnresolvedExpression>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // Resolve tuple of expressions
-        let tuple_resolved = Expression::tuple(table, expected_type, expressions, span.clone()).unwrap();
+        let tuple_resolved = Expression::tuple(table, expected_type, expressions, span.clone())?;
         let type_ = tuple_resolved.type_();
 
         // Insert variable into symbol table
-        insert_defined_variable(table, &variable, type_, span.clone()).unwrap();
+        insert_defined_variable(table, &variable, type_, span.clone())?;
 
         Ok(DefinitionVariables::Tuple(variable, tuple_resolved))
     }
@@ -91,32 +92,40 @@ impl DefinitionVariables {
         expected_type: Option<Type>,
         expressions: Vec<UnresolvedExpression>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // If the expected type is given, then it must be a tuple of types
-        let expected_types = check_tuple_type(expected_type, expressions.len(), span.clone()).unwrap();
+        let explicit_types = check_tuple_type(expected_type, expressions.len(), span.clone())?;
 
         // Check number of variables == types
-        if variables.names.len() != expected_types.len() {
-            unimplemented!("ERROR: Wrong number of types provided")
+        if variables.names.len() != explicit_types.len() {
+            return Err(StatementError::multiple_variable_types(
+                variables.names.len(),
+                explicit_types.len(),
+                span,
+            ));
         }
 
         // Check number of variables == expressions
         if variables.names.len() != expressions.len() {
-            unimplemented!("ERROR: Wrong number of expressions provided")
+            return Err(StatementError::multiple_variable_expressions(
+                variables.names.len(),
+                expressions.len(),
+                span,
+            ));
         }
 
         // Resolve expressions
         let mut expressions_resolved = vec![];
 
-        for (expression, type_) in expressions.into_iter().zip(expected_types) {
-            let expression_resolved = Expression::resolve(table, (type_, expression)).unwrap();
+        for (expression, type_) in expressions.into_iter().zip(explicit_types) {
+            let expression_resolved = Expression::resolve(table, (type_, expression))?;
 
             expressions_resolved.push(expression_resolved);
         }
 
         // Insert variables into symbol table
         for (variable, expression) in variables.names.clone().iter().zip(expressions_resolved.iter()) {
-            insert_defined_variable(table, variable, expression.type_(), span.clone()).unwrap();
+            insert_defined_variable(table, variable, expression.type_(), span.clone())?;
         }
 
         Ok(DefinitionVariables::MultipleVariable(
@@ -132,18 +141,18 @@ impl DefinitionVariables {
         expected_type: Option<Type>,
         expression: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // Resolve tuple expression
-        let expression_resolved = Expression::resolve(table, (expected_type, expression)).unwrap();
+        let expression_resolved = Expression::resolve(table, (expected_type, expression.clone()))?;
 
         let expressions_resolved = match &expression_resolved.value {
             ExpressionValue::Tuple(expressions_resolved, _span) => expressions_resolved.clone(),
-            _ => unimplemented!("ERROR: Cannot define multiple variables to tuple expression"),
+            _ => return Err(StatementError::invalid_tuple(variables.names.len(), expression, span)),
         };
 
         // Insert variables into symbol table
         for (variable, expression) in variables.names.clone().iter().zip(expressions_resolved.iter()) {
-            insert_defined_variable(table, variable, expression.type_(), span.clone()).unwrap();
+            insert_defined_variable(table, variable, expression.type_(), span.clone())?;
         }
 
         Ok(DefinitionVariables::MultipleVariableTuple(
@@ -158,8 +167,8 @@ fn insert_defined_variable(
     table: &mut SymbolTable,
     variable: &VariableName,
     type_: &Type,
-    _span: Span,
-) -> Result<(), ()> {
+    span: Span,
+) -> Result<(), StatementError> {
     let attributes = if variable.mutable {
         vec![Attribute::Mutable]
     } else {
@@ -174,8 +183,15 @@ fn insert_defined_variable(
         attributes,
     };
 
-    // TODO: Check that variable name was not defined before
-    table.insert_variable(key, value);
+    // Check that variable name was not defined twice
+    let duplicate = table.insert_variable(key, value);
+
+    if duplicate.is_some() {
+        return Err(StatementError::duplicate_variable(
+            variable.identifier.name.clone(),
+            span,
+        ));
+    }
 
     Ok(())
 }
@@ -188,13 +204,13 @@ impl Statement {
         variables: Variables,
         expressions: Vec<UnresolvedExpression>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         let num_variables = variables.names.len();
         let num_values = expressions.len();
 
         // If an explicit type is given check that it is valid
         let expected_type = match &variables.type_ {
-            Some(type_) => Some(Type::resolve(table, (type_.clone(), span.clone())).unwrap()),
+            Some(type_) => Some(Type::resolve(table, (type_.clone(), span.clone()))?),
             None => None,
         };
 

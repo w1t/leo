@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Attribute, CircuitType, Entry, Function, ResolvedNode, SymbolTable, Type};
+use crate::{Attribute, CircuitError, CircuitType, Entry, Function, ResolvedNode, SymbolTable, Type};
 use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier, CircuitMember};
 
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ pub struct Circuit {
 }
 
 impl ResolvedNode for Circuit {
-    type Error = ();
+    type Error = CircuitError;
     type UnresolvedNode = UnresolvedCircuit;
 
     /// Returns a resolved circuit AST given an unresolved circuit AST
@@ -66,7 +66,7 @@ impl ResolvedNode for Circuit {
                 CircuitMember::CircuitVariable(_, _, _) => {}
                 CircuitMember::CircuitFunction(_, function) => {
                     let identifier = function.identifier.clone();
-                    let function_resolved = Function::resolve(&mut child_table.clone(), function).unwrap();
+                    let function_resolved = Function::resolve(&mut child_table.clone(), function)?;
 
                     functions.insert(identifier, function_resolved);
                 }

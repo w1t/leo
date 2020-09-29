@@ -17,6 +17,7 @@
 use crate::{
     ast::expressions::array::SpreadOrExpression,
     Expression,
+    ExpressionError,
     ExpressionValue,
     ResolvedNode,
     SymbolTable,
@@ -31,14 +32,18 @@ impl Expression {
         expected_type: Option<Type>,
         expressions: Vec<Box<UnresolvedSpreadOrExpression>>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Expressions should evaluate to array type or array element type
         let expected_element_type = if let Some(type_) = expected_type {
-            let (element_type, dimensions) = type_.get_type_array(span.clone()).unwrap();
+            let (element_type, dimensions) = type_.get_type_array(span.clone())?;
 
-            if expressions.len() != dimensions[0] {
-                //TODO: throw array dimension mismatch error
-                unimplemented!("ERROR: array dimensions do not match expected array type")
+            if dimensions[0] != expressions.len() {
+                //throw array dimension mismatch error
+                return Err(ExpressionError::invalid_length_array(
+                    dimensions[0],
+                    expressions.len(),
+                    span.clone(),
+                ));
             }
 
             Some(element_type.clone())
@@ -52,8 +57,7 @@ impl Expression {
 
         // Resolve all array elements
         for expression in expressions {
-            let expression_resolved =
-                SpreadOrExpression::resolve(table, (expected_element_type.clone(), *expression)).unwrap();
+            let expression_resolved = SpreadOrExpression::resolve(table, (expected_element_type.clone(), *expression))?;
             let expression_type = expression_resolved.type_().clone();
 
             array.push(Box::new(expression_resolved));

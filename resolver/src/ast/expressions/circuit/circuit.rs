@@ -13,36 +13,42 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{CircuitVariableDefinition, Expression, ExpressionValue, ResolvedNode, SymbolTable, Type};
+use crate::{CircuitVariableDefinition, Expression, ExpressionError, ExpressionValue, ResolvedNode, SymbolTable, Type};
 use leo_typed::{CircuitVariableDefinition as UnresolvedCircuitVariableDefinition, Identifier, Span};
 
 impl Expression {
-    /// Resolves an inline circuit expression
+    ///
+    /// Resolves an inline circuit expression.
+    ///
     pub(crate) fn circuit(
         table: &mut SymbolTable,
         expected_type: Option<Type>,
         identifier: Identifier,
         variables: Vec<UnresolvedCircuitVariableDefinition>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Check expected type
         let type_ = Type::Circuit(identifier.clone());
-        Type::check_type(&expected_type, &type_, span.clone()).unwrap();
+        Type::check_type(&expected_type, &type_, span.clone())?;
 
         // Lookup circuit in symbol table
         let circuit_option = table.get_circuit(&identifier);
 
-        //TODO: throw error for undefined circuit
+        // Throw error for undefined circuit
         let circuit = match circuit_option {
             Some(circuit) => circuit,
-            None => unimplemented!("ERROR: circuit not found"),
+            None => return Err(ExpressionError::undefined_circuit(identifier)),
         };
 
         // Check the number of variables given
         let expected_variables = circuit.variables.clone();
 
         if variables.len() != expected_variables.len() {
-            unimplemented!("ERROR: circuit member lengths not equal")
+            return Err(ExpressionError::invalid_length_circuit_members(
+                expected_variables.len(),
+                variables.len(),
+                span,
+            ));
         }
 
         // Check the name and type for each circuit variable
@@ -56,14 +62,13 @@ impl Expression {
 
             let variable_type = match matched_variable {
                 Some(variable_type) => variable_type,
-                None => unimplemented!("ERROR: Unknown circuit member"),
+                None => return Err(ExpressionError::undefined_circuit_variable(variable.identifier)),
             };
 
             // Resolve the variable expression using the expected variable type
             let expected_variable_type = Some(variable_type.type_.clone());
 
-            let variable_resolved =
-                CircuitVariableDefinition::resolve(table, (expected_variable_type, variable)).unwrap();
+            let variable_resolved = CircuitVariableDefinition::resolve(table, (expected_variable_type, variable))?;
 
             variables_resolved.push(variable_resolved);
         }

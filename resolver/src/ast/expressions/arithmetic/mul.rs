@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Span};
 
 impl Expression {
@@ -25,9 +25,9 @@ impl Expression {
         lhs: UnresolvedExpression,
         rhs: UnresolvedExpression,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Resolve lhs and rhs expressions
-        let (lhs_resolved, rhs_resolved) = Self::binary(table, expected_type, lhs, rhs, span.clone()).unwrap();
+        let (lhs_resolved, rhs_resolved) = Self::binary(table, expected_type, lhs, rhs, span.clone())?;
 
         Ok(Expression {
             type_: lhs_resolved.type_.clone(),

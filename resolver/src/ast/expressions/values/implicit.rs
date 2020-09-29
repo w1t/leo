@@ -14,12 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, Type};
 use leo_typed::{GroupValue, Span};
 
 impl Expression {
     /// Resolve an implicit expression
-    pub(crate) fn implicit(expected_type: Option<Type>, implicit_string: String, span: Span) -> Result<Self, ()> {
+    pub(crate) fn implicit(
+        expected_type: Option<Type>,
+        implicit_string: String,
+        span: Span,
+    ) -> Result<Self, ExpressionError> {
         // TODO: impl type lookahead - need to save this implicit value if there is no expected type
         let type_ = expected_type.unwrap();
 

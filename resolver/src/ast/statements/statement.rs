@@ -21,12 +21,14 @@ use crate::{
     Expression,
     Iteration,
     ResolvedNode,
+    StatementError,
     SymbolTable,
 };
 use leo_typed::{ConsoleFunctionCall, Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
 
+/// Stores a type-checked statement in a Leo program
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Statement {
     Return(Expression, Span),
@@ -39,9 +41,10 @@ pub enum Statement {
 }
 
 impl ResolvedNode for Statement {
-    type Error = ();
+    type Error = StatementError;
     type UnresolvedNode = (FunctionOutputType, UnresolvedStatement);
 
+    /// Type check a statement inside a program AST
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let return_type = unresolved.0;
         let statement = unresolved.1;
@@ -61,8 +64,10 @@ impl ResolvedNode for Statement {
                 Self::iteration(table, return_type, index, start, stop, statements, span)
             }
             UnresolvedStatement::Console(console_function_call) => Ok(Statement::Console(console_function_call)),
-
-            _ => Err(()),
+            UnresolvedStatement::Expression(expression, span) => Ok(Statement::Expression(
+                Expression::resolve(table, (None, expression))?,
+                span,
+            )),
         }
     }
 }

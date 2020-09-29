@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Expression, ExpressionValue, SymbolTable, Type};
+use crate::{Expression, ExpressionError, ExpressionValue, SymbolTable, Type};
 use leo_typed::Identifier;
 
 impl Expression {
@@ -23,16 +23,18 @@ impl Expression {
         table: &SymbolTable,
         expected_type: Option<Type>,
         identifier: Identifier,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, ExpressionError> {
         // Lookup identifier in symbol table
-        let variable = table.get_variable(&identifier.name).unwrap();
+        let variable = table
+            .get_variable(&identifier.name)
+            .ok_or(ExpressionError::undefined_identifier(identifier.clone()))?;
 
         // Get type of symbol table entry
         let variable_type = variable.type_();
         let span = identifier.span.clone();
 
         // Check the expected type if given
-        Type::check_type(&expected_type, variable_type, span).unwrap();
+        Type::check_type(&expected_type, variable_type, span)?;
 
         Ok(Expression {
             type_: variable_type.clone(),

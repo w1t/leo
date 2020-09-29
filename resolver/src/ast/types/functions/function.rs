@@ -24,6 +24,8 @@ use leo_typed::{Function, Identifier};
 
 use serde::{Deserialize, Serialize};
 
+/// Stores function definition details
+/// This type should be added to the function symbol table for a type checked program
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FunctionType {
     /// The name of the function definition

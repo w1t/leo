@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{Entry, Expression, FunctionOutputType, ResolvedNode, Statement, SymbolTable, Type};
+use crate::{Entry, Expression, FunctionOutputType, ResolvedNode, Statement, StatementError, SymbolTable, Type};
 use leo_typed::{Expression as UnresolvedExpression, Identifier, IntegerType, Span, Statement as UnresolvedStatement};
 
 use serde::{Deserialize, Serialize};
@@ -38,14 +38,14 @@ impl Statement {
         stop: UnresolvedExpression,
         statements: Vec<UnresolvedStatement>,
         span: Span,
-    ) -> Result<Self, ()> {
+    ) -> Result<Self, StatementError> {
         // TODO: Create child symbol table and add variables from parent
 
         // Resolve index numbers to a u32 type
         let type_number = Type::IntegerType(IntegerType::U32);
 
-        let start_resolved = Expression::resolve(table, (Some(type_number.clone()), start)).unwrap();
-        let stop_resolved = Expression::resolve(table, (Some(type_number.clone()), stop)).unwrap();
+        let start_resolved = Expression::resolve(table, (Some(type_number.clone()), start))?;
+        let stop_resolved = Expression::resolve(table, (Some(type_number.clone()), stop))?;
 
         // Add index to symbol table
         let key = index.name.clone();
@@ -55,14 +55,13 @@ impl Statement {
             attributes: vec![],
         };
 
-        table.insert_variable(key, value).unwrap();
+        table.insert_variable(key, value);
 
         // Resolve statements
         let statements_resolved = statements
             .into_iter()
             .map(|statement| Statement::resolve(table, (return_type.clone(), statement)))
-            .collect::<Result<Vec<Statement>, _>>()
-            .unwrap();
+            .collect::<Result<Vec<Statement>, _>>()?;
 
         Ok(Statement::Iteration(Iteration {
             index,

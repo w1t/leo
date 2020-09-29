@@ -13,21 +13,33 @@
 
 // You should have received a copy of the GNU General Public License
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
-use crate::{ProgramError, SymbolTableError};
-use leo_imports::ImportParserError;
-use leo_typed::Error as FormattedError;
 
+use crate::FunctionError;
+use leo_typed::{Error as FormattedError, Span};
+
+use std::path::PathBuf;
+
+/// Errors encountered when resolving a program
 #[derive(Debug, Error)]
-pub enum ResolverError {
+pub enum CircuitError {
     #[error("{}", _0)]
     Error(#[from] FormattedError),
 
     #[error("{}", _0)]
-    ImportParserError(#[from] ImportParserError),
+    FunctionError(#[from] FunctionError),
+}
 
-    #[error("{}", _0)]
-    ProgramError(#[from] ProgramError),
+impl CircuitError {
+    /// Set the filepath for the error stacktrace
+    pub fn set_path(&mut self, path: PathBuf) {
+        match self {
+            CircuitError::Error(error) => error.set_path(path),
+            CircuitError::FunctionError(error) => error.set_path(path),
+        }
+    }
 
-    #[error("{}", _0)]
-    SymbolTableError(#[from] SymbolTableError),
+    /// Return a new formatted error with a given message and span information
+    fn new_from_span(message: String, span: Span) -> Self {
+        CircuitError::Error(FormattedError::new_from_span(message, span))
+    }
 }
