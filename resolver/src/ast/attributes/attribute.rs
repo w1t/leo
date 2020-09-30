@@ -16,7 +16,7 @@
 
 use serde::{Deserialize, Serialize};
 
-/// An `Attribute` indicates that a program `Identifier` has additional functionality.
+/// Indicates that a program variable has additional functionality.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Attribute {
     Mutable,

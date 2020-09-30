@@ -19,7 +19,7 @@ use leo_typed::Import as UnresolvedImport;
 
 use serde::{Deserialize, Serialize};
 
-/// A type checked import
+/// An import in a resolved syntax tree.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Import {}
 
@@ -27,7 +27,11 @@ impl ResolvedNode for Import {
     type Error = ();
     type UnresolvedNode = UnresolvedImport;
 
-    /// Return a type checked `Import` given an unresolved import
+    ///
+    /// Return a new `Import` from a given `UnresolvedImport`.
+    ///
+    /// Performs a lookup in the given symbol table if the import contains user-defined types.
+    ///
     fn resolve(_table: &mut SymbolTable, _resolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         Ok(Import {})
     }

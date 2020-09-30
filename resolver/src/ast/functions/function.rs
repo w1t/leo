@@ -19,14 +19,13 @@ use leo_typed::Function as UnresolvedFunction;
 
 use serde::{Deserialize, Serialize};
 
-/// Stores function definition and function statements
-/// This struct should be part of the type checked AST
+/// A function in a resolved syntax tree.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Function {
-    /// The name of the function definition
+    /// The user-defined type of this function.
     pub type_: FunctionType,
 
-    /// The function statements
+    /// The function statements.
     pub statements: Vec<Statement>,
 }
 
@@ -34,7 +33,11 @@ impl ResolvedNode for Function {
     type Error = FunctionError;
     type UnresolvedNode = UnresolvedFunction;
 
-    /// Type check a function inside a program AST
+    ///
+    /// Return a new `Function` from a given `UnresolvedFunction`.
+    ///
+    /// Performs a lookup in the given symbol table if the function contains user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         // Lookup function identifier in symbol table
         let identifier = unresolved.identifier;

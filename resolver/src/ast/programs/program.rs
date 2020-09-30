@@ -15,14 +15,14 @@
 // along with the Leo library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{Circuit, Function, ProgramError, ResolvedNode, SymbolTable, TestFunction};
-use leo_typed::{programs::Program as TypedProgram, Identifier};
+use leo_typed::{programs::Program as UnresolvedProgram, Identifier};
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub static MAIN_FUNCTION_NAME: &str = "main";
 
-/// A type checked Leo program
+/// The root of the resolved syntax tree.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Program {
     // pub imports: Vec<Import>,
@@ -33,14 +33,16 @@ pub struct Program {
 
 impl ResolvedNode for Program {
     type Error = ProgramError;
-    type UnresolvedNode = TypedProgram;
+    type UnresolvedNode = UnresolvedProgram;
 
     ///
-    /// Returns a resolved program AST given an unresolved program AST.
+    /// Returns a `Program` given an `UnresolvedProgram` AST.
     ///
     /// At each AST node:
     ///    1. Resolve all child AST nodes.
     ///    2. Resolve current AST node.
+    ///
+    /// Performs a lookup in the given symbol table if the function contains user-defined types.
     ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let mut circuits = HashMap::new();

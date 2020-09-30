@@ -19,12 +19,12 @@ use leo_typed::{Identifier, TestFunction as UnresolvedTestFunction};
 
 use serde::{Deserialize, Serialize};
 
-/// A type checked test function
+/// A test function in a resolved syntax tree.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TestFunction {
-    /// The test function definition
+    /// The test function.
     pub function: Function,
-    /// The custom test input file
+    /// The custom test input file.
     pub input_file: Option<Identifier>,
 }
 
@@ -32,7 +32,11 @@ impl ResolvedNode for TestFunction {
     type Error = FunctionError;
     type UnresolvedNode = UnresolvedTestFunction;
 
-    /// Return a type checked `TestFunction` given an unresolved test function
+    ///
+    /// Return a new `TestFunction` from a given `UnresolvedTestFunction`.
+    ///
+    /// Performs a lookup in the given symbol table if the test function contains user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         Ok(TestFunction {
             function: Function::resolve(table, unresolved.function).unwrap(),

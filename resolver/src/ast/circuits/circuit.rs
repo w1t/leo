@@ -20,12 +20,13 @@ use leo_typed::{circuit::Circuit as UnresolvedCircuit, identifier::Identifier, C
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// A resolved circuit definition.
+/// A circuit in the resolved syntax tree.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Circuit {
-    /// The name of the circuit definition
+    /// The user-defined type of this circuit.
     pub type_: CircuitType,
-    /// The circuit member functions
+
+    /// The circuit member functions.
     pub functions: HashMap<Identifier, Function>,
 }
 
@@ -33,7 +34,11 @@ impl ResolvedNode for Circuit {
     type Error = CircuitError;
     type UnresolvedNode = UnresolvedCircuit;
 
-    /// Returns a resolved circuit AST given an unresolved circuit AST
+    ///
+    /// Return a new `Circuit` from a given `UnresolvedCircuit`.
+    ///
+    /// Performs a lookup in the given symbol table if the circuit contains user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let identifier = unresolved.circuit_name;
         let type_ = table.get_circuit(&identifier.name).unwrap().clone();
