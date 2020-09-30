@@ -24,17 +24,19 @@ use leo_typed::{Function, Identifier};
 
 use serde::{Deserialize, Serialize};
 
-/// Stores function definition details
-/// This type should be added to the function symbol table for a type checked program
+/// Stores function definition details.
+///
+/// This type should be added to the function symbol table for a resolved syntax tree.
+/// This is a user-defined type.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FunctionType {
-    /// The name of the function definition
+    /// The name of the function definition.
     pub identifier: Identifier,
 
-    /// The function inputs
+    /// The function inputs.
     pub inputs: Vec<FunctionInputType>,
 
-    /// The function output
+    /// The function output.
     pub output: FunctionOutputType,
 }
 
@@ -42,7 +44,12 @@ impl ResolvedNode for FunctionType {
     type Error = TypeError;
     type UnresolvedNode = Function;
 
-    /// Type check a function definition
+    ///
+    /// Return a new `FunctionType` from a given `Function` definition.
+    ///
+    /// Performs a lookup in the given symbol table if the function definition contains
+    /// user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let mut inputs_resolved = vec![];
 
@@ -64,17 +71,31 @@ impl ResolvedNode for FunctionType {
 }
 
 impl FunctionType {
-    /// Resolve a function definition and insert it into the given symbol table
+    ///
+    /// Resolve a function definition and insert it into the given symbol table.
+    ///
     pub fn insert_definition(table: &mut SymbolTable, unresolved_function: Function) -> Result<(), TypeError> {
+        // Get the identifier of the function.
         let function_identifier = unresolved_function.identifier.clone();
+
+        // Resolve the function definition into a function type.
         let function = Self::resolve(table, unresolved_function)?;
 
+        // Insert (function_identifier -> function_type) as a (key -> value) pair in the symbol table.
         table.insert_function(function_identifier, function);
 
         Ok(())
     }
 
-    /// Resolve a circuit function definition and return it {
+    ///
+    /// Return a new `FunctionType` from a given `Function` definition.
+    ///
+    /// Performs a lookup in the given symbol table if the function definition contains
+    /// user-defined types.
+    ///
+    /// If the function definition contains the `Self` keyword, then the given circuit identifier
+    /// is used as the type.
+    ///
     pub fn from_circuit(
         table: &mut SymbolTable,
         circuit_name: Identifier,

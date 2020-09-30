@@ -94,7 +94,9 @@ impl LeoResolvedAst {
     }
 }
 
-/// A node in the `LeoResolvedAST`. This node and all of its children should not contain any implicit types.
+/// A node in the `LeoResolvedAST`.
+///
+/// This node and all of its children should not contain any implicit types.
 pub trait ResolvedNode {
     /// The expected error type if the type resolution fails.
     type Error;
@@ -102,7 +104,9 @@ pub trait ResolvedNode {
     /// The `leo-typed` AST node that is being type checked.
     type UnresolvedNode;
 
+    ///
     /// Returns a resolved AST representation given an unresolved AST representation and symbol table.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error>
     where
         Self: std::marker::Sized;

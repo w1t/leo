@@ -29,7 +29,12 @@ impl ResolvedNode for FunctionInputType {
     type Error = TypeError;
     type UnresolvedNode = FunctionInput;
 
-    /// Type check a function input. Can be a typed variable or `input`.
+    ///
+    /// Return a new `FunctionInputType` from a given `FunctionInput`.
+    ///
+    /// Performs a lookup in the given symbol table if the function input contains
+    /// user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         Ok(match unresolved {
             FunctionInput::InputKeyword(identifier) => FunctionInputType::InputKeyword(identifier),
@@ -43,6 +48,9 @@ impl ResolvedNode for FunctionInputType {
 }
 
 impl FunctionInputType {
+    ///
+    /// Return the `Identifier` containing name and span information about the current function input.
+    ///
     pub fn identifier(&self) -> &Identifier {
         match self {
             FunctionInputType::InputKeyword(identifier) => identifier,
@@ -50,6 +58,9 @@ impl FunctionInputType {
         }
     }
 
+    ///
+    /// Return the `Type` of the current function input.
+    ///
     pub fn type_(&self) -> &Type {
         match self {
             FunctionInputType::InputKeyword(_) => unimplemented!("ERROR: input type not implemented"),
@@ -57,7 +68,15 @@ impl FunctionInputType {
         }
     }
 
-    /// Return a resolved function input from inside of a circuit
+    ///
+    /// Return a new `FunctionInputType` from a given `FunctionInput`.
+    ///
+    /// Performs a lookup in the given symbol table if the function input contains
+    /// user-defined types.
+    ///
+    /// If the type of the function input is the `Self` keyword, then the given circuit identifier
+    /// is used as the type.
+    ///
     pub fn from_circuit(
         table: &mut SymbolTable,
         unresolved: FunctionInput,
@@ -74,7 +93,11 @@ impl FunctionInputType {
         })
     }
 
-    /// Insert this function input into the given symbol table
+    ///
+    /// Insert the current function input type into the given symbol table.
+    ///
+    /// If the symbol table did not have this name present, `None` is returned.
+    ///
     pub fn insert(&self, table: &mut SymbolTable) -> Option<VariableType> {
         match self {
             FunctionInputType::Variable(variable) => variable.insert(table),

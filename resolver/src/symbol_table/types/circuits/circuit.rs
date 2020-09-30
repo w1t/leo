@@ -27,17 +27,19 @@ use leo_typed::{Circuit, CircuitMember, Identifier};
 
 use serde::{Deserialize, Serialize};
 
-/// Stores circuit definition details
-/// This type should be added to the circuit symbol table for a type checked program
+/// Stores circuit definition details.
+///
+/// This type should be added to the circuit symbol table for a resolved syntax tree.
+/// This is a user-defined type.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitType {
-    /// The name of the circuit definition
+    /// The name of the circuit definition.
     pub identifier: Identifier,
 
-    /// The circuit member variables
+    /// The circuit variables.
     pub variables: Vec<CircuitVariableType>,
 
-    /// The circuit member functions
+    /// The circuit functions.
     pub functions: Vec<CircuitFunctionType>,
 }
 
@@ -45,16 +47,22 @@ impl ResolvedNode for CircuitType {
     type Error = TypeError;
     type UnresolvedNode = Circuit;
 
-    /// Type check a circuit definition
+    ///
+    /// Return a new `CircuitType` from a given `Circuit` definition.
+    ///
+    /// Performs a lookup in the given symbol table if the circuit definition contains
+    /// user-defined types.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let circuit_identifier = unresolved.circuit_name;
         let mut variables = vec![];
         let mut functions = vec![];
 
+        // Resolve the type of every circuit member.
         for member in unresolved.members {
             match member {
                 CircuitMember::CircuitVariable(is_mutable, variable_identifier, type_) => {
-                    // Resolve the type of the circuit member variable
+                    // Resolve the type of the circuit member variable.
                     let type_ = Type::from_circuit(
                         table,
                         type_,
@@ -62,30 +70,39 @@ impl ResolvedNode for CircuitType {
                         circuit_identifier.span.clone(),
                     )?;
 
+                    // Check if the circuit member variable is mutable.
                     let attributes = if is_mutable { vec![Attribute::Mutable] } else { vec![] };
 
+                    // Create a new circuit variable type.
                     let variable = CircuitVariableType {
                         identifier: variable_identifier,
                         type_,
                         attributes,
                     };
 
+                    // Store the circuit variable type.
                     variables.push(variable);
                 }
                 CircuitMember::CircuitFunction(is_static, function) => {
+                    // Resolve the type of the circuit member function.
                     let function_type = FunctionType::from_circuit(table, circuit_identifier.clone(), function)?;
+
+                    // Check if the circuit member function is static.
                     let attributes = if is_static { vec![Attribute::Static] } else { vec![] };
 
+                    // Create a new circuit function type.
                     let function = CircuitFunctionType {
                         function: function_type,
                         attributes,
                     };
 
+                    // Store the circuit function type.
                     functions.push(function);
                 }
             }
         }
 
+        // Return a new circuit type.
         Ok(CircuitType {
             identifier: circuit_identifier.clone(),
             variables,
@@ -95,18 +112,30 @@ impl ResolvedNode for CircuitType {
 }
 
 impl CircuitType {
+    ///
     /// Resolve a circuit definition and insert it into the given symbol table.
+    ///
     pub fn insert_definition(table: &mut SymbolTable, unresolved_circuit: Circuit) -> Result<(), TypeError> {
+        // Get the identifier of the circuit definition.
         let circuit_identifier = unresolved_circuit.circuit_name.clone();
-        let circuit = Self::resolve(table, unresolved_circuit)?;
 
-        table.insert_circuit(circuit_identifier, circuit);
+        // Resolve the circuit definition into a circuit type.
+        let circuit_type = Self::resolve(table, unresolved_circuit)?;
+
+        // Insert (circuit_identifier -> circuit_type) as a (key -> value) pair in the symbol table.
+        table.insert_circuit(circuit_identifier, circuit_type);
 
         Ok(())
     }
 
-    /// Resolves the type of a circuit variable or the return type of a circuit function
+    ///
+    /// Returns the type of a circuit member.
+    ///
+    /// If the member is a circuit variable, then the type of the variable is returned.
+    /// If the member is a circuit function, then the return type of the function is returned.
+    ///
     pub fn member_type(&self, identifier: &Identifier) -> Result<&Type, TypeError> {
+        // Check if the circuit member is a circuit variable.
         let matched_variable = self
             .variables
             .iter()
@@ -115,10 +144,12 @@ impl CircuitType {
         match matched_variable {
             Some(variable) => Ok(&variable.type_),
             None => {
+                // Check if the circuit member is a circuit function.
                 let matched_function = self
                     .functions
                     .iter()
                     .find(|function| function.function.identifier.eq(identifier));
+
                 match matched_function {
                     Some(function) => Ok(&function.function.output.type_),
                     None => Err(TypeError::undefined_circuit_member(identifier.clone())),

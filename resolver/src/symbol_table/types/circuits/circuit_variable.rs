@@ -21,10 +21,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitVariableType {
-    /// The name of the circuit member variable
+    /// The name of the circuit variable
     pub identifier: Identifier,
-    /// The type of the circuit member variable
+    /// The type of the circuit variable
     pub type_: Type,
-    /// The attributes of the circuit member variable
+    /// The attributes of the circuit variable
     pub attributes: Vec<Attribute>,
 }

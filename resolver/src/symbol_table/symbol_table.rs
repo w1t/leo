@@ -21,6 +21,7 @@ use leo_imports::ImportParser;
 use std::collections::HashMap;
 
 /// A abstract data type that tracks the current bindings of identifier names in a Leo program.
+///
 /// A symbol table has access to all function and circuit names in its parent's symbol table.
 /// A symbol table cannot access names in a child's symbol table.
 /// Children cannot access names in another sibling's symbol table.
@@ -37,9 +38,6 @@ pub struct SymbolTable {
 
     /// The parent of this symbol table
     parent: Option<Box<SymbolTable>>,
-
-    /// The children of this symbol table
-    children: Vec<SymbolTable>,
 }
 
 impl SymbolTable {
@@ -52,51 +50,50 @@ impl SymbolTable {
             circuits: HashMap::new(),
             functions: HashMap::new(),
             parent,
-            children: vec![],
         }
     }
 
     ///
-    /// Insert a variable into the symbol table from a given variable name and variable type.
+    /// Insert a variable into the symbol table from a given name and variable type.
     ///
     /// If the symbol table did not have this name present, `None` is returned.
     ///
-    pub fn insert_variable(&mut self, key: String, value: VariableType) -> Option<VariableType> {
-        self.variables.insert(key, value)
+    pub fn insert_variable(&mut self, name: String, variable_type: VariableType) -> Option<VariableType> {
+        self.variables.insert(name, variable_type)
     }
 
     ///
-    /// Insert a circuit definition into the symbol table from a given circuit name and
+    /// Insert a circuit definition into the symbol table from a given circuit identifier and
     /// circuit type.
     ///
     /// If the symbol table did not have this name present, `None` is returned.
     ///
-    pub fn insert_circuit(&mut self, key: Identifier, value: CircuitType) -> Option<CircuitType> {
-        self.circuits.insert(key.name, value)
+    pub fn insert_circuit(&mut self, identifier: Identifier, circuit_type: CircuitType) -> Option<CircuitType> {
+        self.circuits.insert(identifier.name, circuit_type)
     }
 
     ///
-    /// Insert a function definition into the symbol table from a given function name and
+    /// Insert a function definition into the symbol table from a given identifier and
     /// function type.
     ///
     /// If the symbol table did not have this name present, `None` is returned.
     ///
-    pub fn insert_function(&mut self, key: Identifier, value: FunctionType) -> Option<FunctionType> {
-        self.functions.insert(key.name, value)
+    pub fn insert_function(&mut self, identifier: Identifier, function_type: FunctionType) -> Option<FunctionType> {
+        self.functions.insert(identifier.name, function_type)
     }
 
     ///
-    /// Returns a reference to the
+    /// Returns a reference to the variable type corresponding to the name.
     ///
+    /// If the name does not exist in the current symbol table, the parent symbol table is checked.
     ///
-    ///
-    pub fn get_variable(&self, key: &String) -> Option<&VariableType> {
-        match self.variables.get(key) {
+    pub fn get_variable(&self, name: &String) -> Option<&VariableType> {
+        match self.variables.get(name) {
             Some(variable) => Some(variable),
             None => {
                 // Look in parent symbol table
                 match &self.parent {
-                    Some(parent) => parent.get_variable(key),
+                    Some(parent) => parent.get_variable(name),
                     None => None,
                 }
             }
@@ -104,7 +101,9 @@ impl SymbolTable {
     }
 
     ///
-    /// Get the current binding of a circuit type.
+    /// Returns a reference to the circuit type corresponding to the name.
+    ///
+    /// If the name does not exist in the current symbol table, the parent symbol table is checked.
     ///
     pub fn get_circuit(&self, key: &String) -> Option<&CircuitType> {
         match self.circuits.get(key) {
@@ -120,7 +119,9 @@ impl SymbolTable {
     }
 
     ///
-    /// Get the current binding of a function type.
+    /// Returns a reference to the function type corresponding to the name.
+    ///
+    /// If the name does not exist in the current symbol table, the parent symbol table is checked.
     ///
     pub fn get_function(&self, key: &String) -> Option<&FunctionType> {
         match self.functions.get(key) {
@@ -136,16 +137,9 @@ impl SymbolTable {
     }
 
     ///
-    /// Adds a child symbol table
-    /// Children have access to identifiers in the current symbol table
+    /// Inserts all imported identifiers for a given list of imported programs.
     ///
-    pub fn push_child(&mut self, child: SymbolTable) {
-        self.children.push(child)
-    }
-
-    ///
-    /// Inserts all imported identifiers for a given list of imported programs
-    /// No type resolution performed at this step
+    /// No type resolution performed at this step.
     ///
     pub fn insert_imports(&mut self, _imports: ImportParser) {}
 

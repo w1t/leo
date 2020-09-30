@@ -30,14 +30,14 @@ impl Expression {
             .ok_or(ExpressionError::undefined_identifier(identifier.clone()))?;
 
         // Get type of symbol table entry
-        let variable_type = variable.type_();
+        let variable_type = variable.type_.clone();
         let span = identifier.span.clone();
 
         // Check the expected type if given
-        Type::check_type(&expected_type, variable_type, span)?;
+        Type::check_type(&expected_type, &variable_type, span)?;
 
         Ok(Expression {
-            type_: variable_type.clone(),
+            type_: variable_type,
             value: ExpressionValue::Identifier(identifier),
         })
     }

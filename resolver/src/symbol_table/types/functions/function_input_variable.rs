@@ -23,10 +23,13 @@ use serde::{Deserialize, Serialize};
 pub struct FunctionInputVariableType {
     /// Name of function input
     pub identifier: Identifier,
+
     /// Type of function input
     pub type_: Type,
+
     /// The attributes of the function input
     pub attributes: Vec<Attribute>,
+
     /// The span of the function input
     pub span: Span,
 }
@@ -35,7 +38,11 @@ impl ResolvedNode for FunctionInputVariableType {
     type Error = TypeError;
     type UnresolvedNode = FunctionInputVariable;
 
-    /// Type check an input to a function
+    ///
+    /// Return a new `FunctionInputVariableType` from a given `FunctionInputVariable`.
+    ///
+    /// Performs a lookup in the given symbol table if the type is user-defined.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let type_ = Type::resolve(table, (unresolved.type_, unresolved.span.clone()))?;
         let attributes = if unresolved.mutable {
@@ -54,7 +61,14 @@ impl ResolvedNode for FunctionInputVariableType {
 }
 
 impl FunctionInputVariableType {
-    /// Return a resolved function input variable from inside of a circuit
+    ///
+    /// Return a new `FunctionInputVariableType` from a given `FunctionInputVariable`.
+    ///
+    /// Performs a lookup in the given symbol table if the type is user-defined.
+    ///
+    /// If the type of the function return type is the `Self` keyword, then the given circuit
+    /// identifier is used as the type.
+    ///
     pub fn from_circuit(
         table: &mut SymbolTable,
         unresolved_function_input: FunctionInputVariable,
@@ -80,7 +94,11 @@ impl FunctionInputVariableType {
         })
     }
 
-    /// Insert this function variable into the given symbol table
+    ///
+    /// Insert the current function input variable type into the given symbol table.
+    ///
+    /// If the symbol table did not have this name present, `None` is returned.
+    ///
     pub fn insert(&self, table: &mut SymbolTable) -> Option<VariableType> {
         let key = self.identifier.name.clone();
         let value = VariableType::from(self.clone());

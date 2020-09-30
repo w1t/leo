@@ -42,7 +42,9 @@ impl ResolvedNode for Type {
     type Error = TypeError;
     type UnresolvedNode = (UnresolvedType, Span);
 
+    ///
     /// Resolves the given type. Cannot be an implicit or Self type.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, Self::Error> {
         let type_ = unresolved.0;
         let span = unresolved.1;

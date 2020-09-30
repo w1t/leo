@@ -28,9 +28,14 @@ pub struct FunctionOutputType {
 
 impl ResolvedNode for FunctionOutputType {
     type Error = TypeError;
-    /// (function output, span)
+    /// (optional function output, span)
     type UnresolvedNode = (Option<UnresolvedType>, Span);
 
+    ///
+    /// Return a new `FunctionOutputType` from a given optional function return type and span.
+    ///
+    /// Performs a lookup in the given symbol table if the return type is user-defined.
+    ///
     fn resolve(table: &mut SymbolTable, unresolved: Self::UnresolvedNode) -> Result<Self, TypeError> {
         let function_output = unresolved.0;
         let span = unresolved.1;
@@ -45,7 +50,14 @@ impl ResolvedNode for FunctionOutputType {
 }
 
 impl FunctionOutputType {
-    /// Return a resolved function output type from inside of a circuit
+    ///
+    /// Return a new `FunctionOutputType` from a given optional function return type and span.
+    ///
+    /// Performs a lookup in the given symbol table if the return type is user-defined.
+    ///
+    /// If the type of the function return type is the `Self` keyword, then the given circuit
+    /// identifier is used as the type.
+    ///
     pub fn from_circuit(
         table: &mut SymbolTable,
         circuit_name: Identifier,

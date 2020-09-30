@@ -20,8 +20,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CircuitFunctionType {
-    /// The function signature of the circuit member function
+    /// The function signature of the circuit function
     pub function: FunctionType,
-    /// The attributes of the circuit member function
+    /// The attributes of the circuit function
     pub attributes: Vec<Attribute>,
 }

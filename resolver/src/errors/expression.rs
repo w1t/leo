@@ -19,9 +19,7 @@ use leo_typed::{Error as FormattedError, Identifier, Span};
 
 use std::path::PathBuf;
 
-///
 /// Errors encountered when resolving an expression.
-///
 #[derive(Debug, Error)]
 pub enum ExpressionError {
     #[error("{}", _0)]

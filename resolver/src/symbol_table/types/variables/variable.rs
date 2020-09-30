@@ -19,7 +19,9 @@ use leo_typed::{Circuit, Function, Identifier};
 use crate::FunctionInputVariableType;
 use std::fmt;
 
-/// Stores the identifier, type and attribute information for a variable.
+/// Stores variable definition details.
+///
+/// This type should be added to the variable symbol table for a resolved syntax tree.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct VariableType {
     pub identifier: Identifier,
@@ -28,13 +30,6 @@ pub struct VariableType {
 }
 
 impl VariableType {
-    ///
-    /// Returns the type of the variable.
-    ///
-    pub fn type_(&self) -> &Type {
-        &self.type_
-    }
-
     ///
     /// Returns `true` if this variable's value can be modified.
     ///
