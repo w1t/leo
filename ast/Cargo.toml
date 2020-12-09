@@ -37,10 +37,12 @@ version = "1.0.6"
 [dependencies.snarkos-errors]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-models]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.indexmap]
 version = "1.6.0"

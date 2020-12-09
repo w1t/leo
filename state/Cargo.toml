@@ -28,26 +28,32 @@ version = "1.0.6"
 [dependencies.snarkos-algorithms]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-curves]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-dpc]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-errors]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-models]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-objects]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-utilities]
 git = "https://github.com/AleoHQ/snarkOS"

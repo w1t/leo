@@ -20,10 +20,12 @@ edition = "2018"
 [dependencies.snarkos-errors]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-models]
 git = "https://github.com/AleoHQ/snarkOS"
 branch = "test/blake2-one-round"
+default-features = false
 
 [dependencies.snarkos-utilities]
 git = "https://github.com/AleoHQ/snarkOS"
