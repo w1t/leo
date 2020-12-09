@@ -349,10 +349,10 @@ impl<F: Field + PrimeField, G: GroupType<F>> ConstraintSynthesizer<F> for Compil
     ///
     /// Synthesizes the circuit with program input.
     ///
-    fn generate_constraints<CS: ConstraintSystem<F>>(self, cs: &mut CS) -> Result<(), SynthesisError> {
+    fn generate_constraints<CS: ConstraintSystem<F>>(&self, cs: &mut CS) -> Result<(), SynthesisError> {
         let output_directory = self.output_directory.clone();
         let package_name = self.package_name.clone();
-        let result = self.generate_constraints_helper(cs).map_err(|e| {
+        let result = Self::generate_constraints_helper(self.clone(), cs).map_err(|e| {
             tracing::error!("{}", e);
             SynthesisError::Unsatisfiable
         })?;
