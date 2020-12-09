@@ -32,7 +32,7 @@ use leo_ast::{
     Statement,
     Type,
 };
-use snarkos_gadgets::algorithms::prf::Blake2sGadget;
+use snarkos_gadgets::algorithms::prf::Blake2OneRoundGadget; //TODO: FOR TESTING ONLY. NOT SECURE.
 use snarkos_models::{
     curves::{Field, PrimeField},
     gadgets::{
@@ -130,7 +130,7 @@ impl CoreCircuit for Blake2sCircuit {
         }
     }
 
-    /// Calls the native `Blake2sGadget` on the given constraint system with the given arguments
+    /// Calls the native `Blake2OneRoundGadget` on the given constraint system with the given arguments
     fn call<F: Field + PrimeField, CS: ConstraintSystem<F>>(
         mut cs: CS,
         arguments: Vec<Value>,
@@ -151,8 +151,8 @@ impl CoreCircuit for Blake2sCircuit {
         let input = check_array_bytes(input_value, 32, span.clone())?;
 
         // Call blake2s gadget
-        let digest =
-            Blake2sGadget::check_evaluation_gadget(cs.ns(|| "blake2s hash"), &seed[..], &input[..]).map_err(|e| {
+        let digest = Blake2OneRoundGadget::check_evaluation_gadget(cs.ns(|| "blake2s hash"), &seed[..], &input[..])
+            .map_err(|e| {
                 CoreCircuitError::cannot_enforce("Blake2s check evaluation gadget".to_owned(), e, span.clone())
             })?;
 
